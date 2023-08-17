@@ -15,11 +15,11 @@ namespace CarPark.Controllers
 
         public IActionResult Index()
         {
-            return View();
-        }
+            using (AppDbContext context = new())
+            {
+                ViewBag.Vehicles = context.Vehicles.ToList();
+            }
 
-        public IActionResult Privacy()
-        {
             return View();
         }
 
