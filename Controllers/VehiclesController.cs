@@ -55,7 +55,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BrandId,Price,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Create([Bind("Id,BrandId,Price,RegistrationNumber,Year,Mileage")] Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
@@ -87,7 +87,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BrandId,Price,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BrandId,Price,RegistrationNumber,Year,Mileage")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
             {

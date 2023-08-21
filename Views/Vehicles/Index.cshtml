@@ -15,15 +15,18 @@
                 @Html.DisplayNameFor(model => model.BrandId)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Mileage)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RegistrationNumber)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Year)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mileage)
-            </th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -37,13 +40,16 @@
                     @Html.DisplayFor(modelItem => item.BrandId)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.Mileage)
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.Price)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Year)
+                    @Html.DisplayFor(modelItem => item.RegistrationNumber)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Mileage)
+                    @Html.DisplayFor(modelItem => item.Year)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
