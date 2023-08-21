@@ -9,87 +9,87 @@ using CarPark.Models;
 
 namespace CarPark.Controllers
 {
-    public class VehiclesController : Controller
+    public class BrandsController : Controller
     {
         private readonly AppDbContext _context;
 
-        public VehiclesController(AppDbContext context)
+        public BrandsController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Lists
+        // GET: Brands
         public async Task<IActionResult> Index()
         {
-              return _context.Vehicles != null ? 
-                          View(await _context.Vehicles.ToListAsync()) :
-                          Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+              return _context.Brands != null ? 
+                          View(await _context.Brands.ToListAsync()) :
+                          Problem("Entity set 'AppDbContext.Brands'  is null.");
         }
 
-        // GET: Lists/Details/5
+        // GET: Brands/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Vehicles == null)
+            if (id == null || _context.Brands == null)
             {
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles
+            var brand = await _context.Brands
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (vehicle == null)
+            if (brand == null)
             {
                 return NotFound();
             }
 
-            return View(vehicle);
+            return View(brand);
         }
 
-        // GET: Lists/Create
+        // GET: Brands/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Lists/Create
+        // POST: Brands/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BrandId,Price,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Create([Bind("Id,Name,Type,TankCapacity,LoadCapacity,NumberOfSeats")] Brand brand)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(vehicle);
+                _context.Add(brand);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(vehicle);
+            return View(brand);
         }
 
-        // GET: Lists/Edit/5
+        // GET: Brands/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Vehicles == null)
+            if (id == null || _context.Brands == null)
             {
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles.FindAsync(id);
-            if (vehicle == null)
+            var brand = await _context.Brands.FindAsync(id);
+            if (brand == null)
             {
                 return NotFound();
             }
-            return View(vehicle);
+            return View(brand);
         }
 
-        // POST: Lists/Edit/5
+        // POST: Brands/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BrandId,Price,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Type,TankCapacity,LoadCapacity,NumberOfSeats")] Brand brand)
         {
-            if (id != vehicle.Id)
+            if (id != brand.Id)
             {
                 return NotFound();
             }
@@ -98,12 +98,12 @@ namespace CarPark.Controllers
             {
                 try
                 {
-                    _context.Update(vehicle);
+                    _context.Update(brand);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VehicleExists(vehicle.Id))
+                    if (!BrandExists(brand.Id))
                     {
                         return NotFound();
                     }
@@ -114,49 +114,49 @@ namespace CarPark.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(vehicle);
+            return View(brand);
         }
 
-        // GET: Lists/Delete/5
+        // GET: Brands/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Vehicles == null)
+            if (id == null || _context.Brands == null)
             {
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles
+            var brand = await _context.Brands
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (vehicle == null)
+            if (brand == null)
             {
                 return NotFound();
             }
 
-            return View(vehicle);
+            return View(brand);
         }
 
-        // POST: Lists/Delete/5
+        // POST: Brands/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Vehicles == null)
+            if (_context.Brands == null)
             {
-                return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+                return Problem("Entity set 'AppDbContext.Brands'  is null.");
             }
-            var vehicle = await _context.Vehicles.FindAsync(id);
-            if (vehicle != null)
+            var brand = await _context.Brands.FindAsync(id);
+            if (brand != null)
             {
-                _context.Vehicles.Remove(vehicle);
+                _context.Brands.Remove(brand);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VehicleExists(int id)
+        private bool BrandExists(int id)
         {
-          return (_context.Vehicles?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.Brands?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
