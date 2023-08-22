@@ -12,7 +12,7 @@
                 @Html.DisplayNameFor(model => model.Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.BrandId)
+                @Html.DisplayNameFor(model => model.Brand)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Mileage)
@@ -37,7 +37,7 @@
                     @Html.DisplayFor(modelItem => item.Id)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.BrandId)
+                    @Html.DisplayFor(modelItem => item.Brand.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Mileage)

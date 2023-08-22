@@ -9,12 +9,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
-                <label asp-for="BrandId" class="control-label"></label>
+                <label asp-for="BrandId" class="control-label">Brand</label>
                 <select asp-for="BrandId" class="form-control">
                     <option></option>
                     @foreach (Brand brand in ViewBag.Brands)
                     {
-                        <option>@brand.Id</option>
+                        <option value="@brand.Id">@brand.Name</option>
                     }
                 </select>
                 <span asp-validation-for="BrandId" class="text-danger"></span>

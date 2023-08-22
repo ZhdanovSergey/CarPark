@@ -22,7 +22,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Vehicles != null ? 
-                          View(await _context.Vehicles.ToListAsync()) :
+                          View(await _context.Vehicles.Include(m => m.Brand).ToListAsync()) :
                           Problem("Entity set 'AppDbContext.Vehicles'  is null.");
         }
 
@@ -34,7 +34,7 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles
+            var vehicle = await _context.Vehicles.Include(m => m.Brand)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (vehicle == null)
             {
@@ -132,7 +132,7 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles
+            var vehicle = await _context.Vehicles.Include(m => m.Brand)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (vehicle == null)
             {
