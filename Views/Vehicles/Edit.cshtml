@@ -1,4 +1,5 @@
-﻿@model CarPark.Models.Vehicle
+﻿@using CarPark.Models
+@model CarPark.Models.Vehicle
 
 <h4>Vehicle</h4>
 <hr />
@@ -9,7 +10,13 @@
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="BrandId" class="control-label"></label>
-                <input asp-for="BrandId" class="form-control" />
+                <select asp-for="BrandId" class="form-control">
+                    <option></option>
+                    @foreach (Brand brand in ViewBag.Brands)
+                    {
+                        <option>@brand.Id</option>
+                    }
+                </select>
                 <span asp-validation-for="BrandId" class="text-danger"></span>
             </div>
             <div class="form-group">

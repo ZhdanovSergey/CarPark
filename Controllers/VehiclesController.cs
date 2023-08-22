@@ -46,7 +46,8 @@ namespace CarPark.Controllers
 
         // GET: Lists/Create
         public IActionResult Create()
-        {
+        {   
+            ViewBag.Brands = _context.Brands.ToList();
             return View();
         }
 
@@ -63,6 +64,8 @@ namespace CarPark.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Brands = _context.Brands.ToList();
             return View(vehicle);
         }
 
@@ -79,6 +82,8 @@ namespace CarPark.Controllers
             {
                 return NotFound();
             }
+
+            ViewBag.Brands = _context.Brands.ToList();
             return View(vehicle);
         }
 
@@ -114,6 +119,8 @@ namespace CarPark.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Brands = _context.Brands.ToList();
             return View(vehicle);
         }
 
