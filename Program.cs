@@ -13,6 +13,7 @@ namespace CarPark
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbContext>();
+            builder.Services.AddEndpointsApiExplorer();
 
             var app = builder.Build();
 
