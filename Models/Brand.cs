@@ -8,6 +8,5 @@
         public int NumberOfSeats { get; set; }
         public int TankCapacity { get; set; }
         public string Type { get; set; }
-        public List<Vehicle> Vehicles { get; set; } = new();
     }
 }

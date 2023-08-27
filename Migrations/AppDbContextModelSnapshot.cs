@@ -48,7 +48,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -79,7 +79,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("BrandId");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
