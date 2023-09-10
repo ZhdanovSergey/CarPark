@@ -1,7 +1,7 @@
-﻿@model CarPark.Models.Brand
+﻿@model CarPark.Models.Driver
 
 <div>
-    <h4>Brand</h4>
+    <h4>Driver</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -11,28 +11,25 @@
             @Html.DisplayFor(model => model.Name)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Type)
+            @Html.DisplayNameFor(model => model.Enterprise)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Type)
+            @Html.DisplayFor(model => model.Enterprise.Name)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.LoadCapacity)
+            @Html.DisplayNameFor(model => model.Salary)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.LoadCapacity)
+            @Html.DisplayFor(model => model.Salary)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.NumberOfSeats)
+            Vehicles
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.NumberOfSeats)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TankCapacity)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TankCapacity)
+            @foreach (var vehicleNumber in Model.DriversVehicles.Select(m => m.Vehicle.RegistrationNumber))
+            {
+                <span>@vehicleNumber; </span>
+            }
         </dd>
     </dl>
 </div>

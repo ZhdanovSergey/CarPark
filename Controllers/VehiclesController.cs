@@ -22,7 +22,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Vehicles != null ? 
-                          View(await _context.Vehicles.Include(m => m.Brand).ToListAsync()) :
+                          View(await _context.Vehicles.Include(m => m.Brand).Include(m => m.Enterprise).ToListAsync()) :
                           Problem("Entity set 'AppDbContext.Vehicles'  is null.");
         }
 
@@ -34,7 +34,11 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles.Include(m => m.Brand)
+            var vehicle = await _context.Vehicles
+                .Include(v => v.Brand)
+                .Include(v => v.Enterprise)
+                .Include(v => v.DriversVehicles)
+                    .ThenInclude(d => d.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (vehicle == null)
             {
@@ -45,9 +49,10 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists/Create
-        public IActionResult Create()
-        {   
-            ViewBag.Brands = _context.Brands.ToList();
+        public async Task<IActionResult> Create()
+        {
+            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name");
+            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name");
             return View();
         }
 
@@ -56,7 +61,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BrandId,Price,RegistrationNumber,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Create([Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage")] Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
@@ -65,7 +70,8 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Brands = _context.Brands.ToList();
+            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
+            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
             return View(vehicle);
         }
 
@@ -77,13 +83,19 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var vehicle = await _context.Vehicles
+                .Include(d => d.DriversVehicles)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (vehicle == null)
             {
                 return NotFound();
             }
 
-            ViewBag.Brands = _context.Brands.ToList();
+            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
+            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
+            ViewData["Drivers"] = new MultiSelectList(_context.Drivers, "Id", "Name");
+            vehicle.SelectedDriversIds = vehicle.DriversVehicles.Select(m => m.DriverId).ToList();
             return View(vehicle);
         }
 
@@ -92,7 +104,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BrandId,Price,RegistrationNumber,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,SelectedDriversIds")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
             {
@@ -103,6 +115,26 @@ namespace CarPark.Controllers
             {
                 try
                 {
+                    var driversVehicles = await _context.DriversVehicles
+                        .Where(dv => dv.VehicleId == vehicle.Id)
+                        .ToListAsync();
+
+                    foreach (var driverVehicle in driversVehicles)
+                    {
+                        if (!vehicle.SelectedDriversIds.Any(id => id == driverVehicle.DriverId))
+                        {
+                            _context.DriversVehicles.Remove(driverVehicle);
+                        }
+                    }
+
+                    foreach (var selectedDriverId in vehicle.SelectedDriversIds)
+                    {
+                        if (!driversVehicles.Any(m => m.DriverId == selectedDriverId))
+                        {
+                            _context.DriversVehicles.Add(new DriverVehicle { DriverId = selectedDriverId, VehicleId = vehicle.Id });
+                        }
+                    }
+
                     _context.Update(vehicle);
                     await _context.SaveChangesAsync();
                 }
@@ -120,7 +152,9 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Brands = _context.Brands.ToList();
+            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
+            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
+            ViewData["Drivers"] = new MultiSelectList(_context.Drivers, "Id", "Name");
             return View(vehicle);
         }
 
@@ -132,8 +166,12 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
-            var vehicle = await _context.Vehicles.Include(m => m.Brand)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var vehicle = await _context.Vehicles
+                .Include(v => v.Brand)
+                .Include(v => v.Enterprise)
+                .Include(v => v.DriversVehicles)
+                    .ThenInclude(dv => dv.Driver)
+                .FirstOrDefaultAsync(v => v.Id == id);
             if (vehicle == null)
             {
                 return NotFound();

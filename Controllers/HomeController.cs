@@ -6,10 +6,6 @@ namespace CarPark.Controllers
 {
     public class HomeController : Controller
     {
-        public HomeController(AppDbContext context)
-        {
-        }
-
         public IActionResult Index()
         {
             return View();

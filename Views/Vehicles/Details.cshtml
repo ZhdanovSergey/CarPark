@@ -5,6 +5,18 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.RegistrationNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.RegistrationNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Enterprise)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Enterprise.Name)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Brand)
         </dt>
         <dd class="col-sm-10">
@@ -23,16 +35,19 @@
             @Html.DisplayFor(model => model.Price)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.RegistrationNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.RegistrationNumber)
-        </dd>
-        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Year)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Year)
+        </dd>
+        <dt class="col-sm-2">
+            Drivers
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var driverName in Model.DriversVehicles.Select(m => m.Driver.Name))
+            {
+                <span>@driverName; </span>
+            }
         </dd>
     </dl>
 </div>

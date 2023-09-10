@@ -3,6 +3,7 @@ using CarPark.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarPark.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230903074723_Required-EnterpriseId")]
+    partial class RequiredEnterpriseId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", (string)null);
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -73,22 +76,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Drivers", (string)null);
-                });
-
-            modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
-                {
-                    b.Property<int>("DriverId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("DriverId", "VehicleId");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("DriversVehicles", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("CarPark.Models.Enterprise", b =>
@@ -109,7 +97,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enterprises", (string)null);
+                    b.ToTable("Enterprises");
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -145,7 +133,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -157,25 +145,6 @@ namespace CarPark.Migrations
                         .IsRequired();
 
                     b.Navigation("Enterprise");
-                });
-
-            modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
-                {
-                    b.HasOne("CarPark.Models.Driver", "Driver")
-                        .WithMany("DriversVehicles")
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarPark.Models.Vehicle", "Vehicle")
-                        .WithMany("DriversVehicles")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Driver");
-
-                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -197,21 +166,11 @@ namespace CarPark.Migrations
                     b.Navigation("Enterprise");
                 });
 
-            modelBuilder.Entity("CarPark.Models.Driver", b =>
-                {
-                    b.Navigation("DriversVehicles");
-                });
-
             modelBuilder.Entity("CarPark.Models.Enterprise", b =>
                 {
                     b.Navigation("Drivers");
 
                     b.Navigation("Vehicles");
-                });
-
-            modelBuilder.Entity("CarPark.Models.Vehicle", b =>
-                {
-                    b.Navigation("DriversVehicles");
                 });
 #pragma warning restore 612, 618
         }

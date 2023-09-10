@@ -9,15 +9,17 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
+                <label asp-for="RegistrationNumber" class="control-label"></label>
+                <input asp-for="RegistrationNumber" class="form-control" />
+                <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EnterpriseId" class="control-label">Enterprise</label>
+                <select asp-for="EnterpriseId" class="form-control" asp-items="ViewBag.Enterprises"></select>
+            </div>
+            <div class="form-group">
                 <label asp-for="BrandId" class="control-label">Brand</label>
-                <select asp-for="BrandId" class="form-control">
-                    <option></option>
-                    @foreach (Brand brand in ViewBag.Brands)
-                    {
-                        <option value="@brand.Id">@brand.Name</option>
-                    }
-                </select>
-                <span asp-validation-for="BrandId" class="text-danger"></span>
+                <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands"></select>
             </div>
             <div class="form-group">
                 <label asp-for="Mileage" class="control-label"></label>
@@ -30,14 +32,13 @@
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="RegistrationNumber" class="control-label"></label>
-                <input asp-for="RegistrationNumber" class="form-control" />
-                <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Year" class="control-label"></label>
                 <input asp-for="Year" class="form-control" />
                 <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedDriversIds" class="control-label">Drivers</label>
+                <select asp-for="SelectedDriversIds" multiple="multiple" class="form-control" asp-items="ViewBag.Drivers"></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
