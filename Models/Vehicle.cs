@@ -8,7 +8,6 @@ namespace CarPark.Models
     {
         public int Id { get; set; }
         public int BrandId { get; set; }
-        [Column("DriverId")]
         public int? ActiveDriverId { get; set; }
         public int EnterpriseId { get; set; }
         public string RegistrationNumber { get; set; }
@@ -18,7 +17,6 @@ namespace CarPark.Models
         [JsonIgnore]
         public Brand? Brand { get; set; }
         [JsonIgnore]
-        [ForeignKey("ActiveDriverId")]
         public Driver? ActiveDriver { get; set; }
         [JsonIgnore]
         public Enterprise? Enterprise { get; set; }

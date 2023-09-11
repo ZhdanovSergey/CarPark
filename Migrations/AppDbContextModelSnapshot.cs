@@ -49,7 +49,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", (string)null);
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -70,18 +70,11 @@ namespace CarPark.Migrations
                     b.Property<int>("Salary")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VehicleId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EnterpriseId");
 
-                    b.HasIndex("VehicleId")
-                        .IsUnique()
-                        .HasFilter("[VehicleId] IS NOT NULL");
-
-                    b.ToTable("Drivers", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
@@ -101,7 +94,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("DriversVehicles", (string)null);
+                    b.ToTable("DriversVehicles");
                 });
 
             modelBuilder.Entity("CarPark.Models.Enterprise", b =>
@@ -122,7 +115,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enterprises", (string)null);
+                    b.ToTable("Enterprises");
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -133,10 +126,10 @@ namespace CarPark.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BrandId")
+                    b.Property<int?>("ActiveDriverId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DriverId")
+                    b.Property<int>("BrandId")
                         .HasColumnType("int");
 
                     b.Property<int>("EnterpriseId")
@@ -157,11 +150,15 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActiveDriverId")
+                        .IsUnique()
+                        .HasFilter("[ActiveDriverId] IS NOT NULL");
+
                     b.HasIndex("BrandId");
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -172,13 +169,7 @@ namespace CarPark.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CarPark.Models.Vehicle", "Vehicle")
-                        .WithOne("Driver")
-                        .HasForeignKey("CarPark.Models.Driver", "VehicleId");
-
                     b.Navigation("Enterprise");
-
-                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
@@ -210,6 +201,10 @@ namespace CarPark.Migrations
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
                 {
+                    b.HasOne("CarPark.Models.Driver", "ActiveDriver")
+                        .WithOne("ActiveVehicle")
+                        .HasForeignKey("CarPark.Models.Vehicle", "ActiveDriverId");
+
                     b.HasOne("CarPark.Models.Brand", "Brand")
                         .WithMany("Vehicles")
                         .HasForeignKey("BrandId")
@@ -221,6 +216,8 @@ namespace CarPark.Migrations
                         .HasForeignKey("EnterpriseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ActiveDriver");
 
                     b.Navigation("Brand");
 
@@ -234,6 +231,8 @@ namespace CarPark.Migrations
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
                 {
+                    b.Navigation("ActiveVehicle");
+
                     b.Navigation("DriversVehicles");
                 });
 
@@ -248,8 +247,6 @@ namespace CarPark.Migrations
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
                 {
-                    b.Navigation("Driver");
-
                     b.Navigation("DriversVehicles");
                 });
 #pragma warning restore 612, 618

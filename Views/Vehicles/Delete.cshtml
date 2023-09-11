@@ -50,6 +50,12 @@
                 <span>@driverName; </span>
             }
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ActiveDriver)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ActiveDriver.Name)
+        </dd>
     </dl>
 
     <form asp-action="Delete">

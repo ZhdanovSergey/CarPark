@@ -30,12 +30,6 @@ namespace CarPark.Models
                 .HasMany(e => e.Vehicles)
                 .WithOne(v => v.Enterprise)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Vehicle>()
-                .HasOne(v => v.ActiveDriver)
-                .WithOne(d => d.ActiveVehicle)
-                .HasForeignKey<Driver>(d => d.ActiveVehicleId)
-                .IsRequired(false);
         }
     }
 }

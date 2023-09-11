@@ -41,6 +41,12 @@
                 <select asp-for="SelectedDriversIds" multiple="multiple" class="form-control" asp-items="ViewBag.Drivers"></select>
             </div>
             <div class="form-group">
+                <label asp-for="ActiveDriverId" class="control-label">ActiveDriver</label>
+                <select asp-for="ActiveDriverId" class="form-control" asp-items="ViewBag.ActiveDriver">
+                    <option></option>
+                </select>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
