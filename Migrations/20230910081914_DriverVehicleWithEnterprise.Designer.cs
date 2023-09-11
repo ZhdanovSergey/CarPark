@@ -3,6 +3,7 @@ using CarPark.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarPark.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230910081914_DriverVehicleWithEnterprise")]
+    partial class DriverVehicleWithEnterprise
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", (string)null);
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -73,7 +76,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Drivers", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
@@ -93,7 +96,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("DriversVehicles", (string)null);
+                    b.ToTable("DriversVehicles");
                 });
 
             modelBuilder.Entity("CarPark.Models.Enterprise", b =>
@@ -114,7 +117,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enterprises", (string)null);
+                    b.ToTable("Enterprises");
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -150,7 +153,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>

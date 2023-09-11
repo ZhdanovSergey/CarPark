@@ -11,5 +11,7 @@ namespace CarPark.Models
         public List<Vehicle> Vehicles { get; set; } = new();
         [JsonIgnore]
         public List<Driver> Drivers { get; set; } = new();
+        [JsonIgnore]
+        public List<DriverVehicle> DriversVehicles { get; set; } = new();
     }
 }

@@ -18,7 +18,7 @@ namespace CarPark.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DriverVehicle>()
-                .HasKey(m => new { m.DriverId, m.VehicleId });
+                .HasKey(m => new { m.EnterpriseId, m.DriverId, m.VehicleId });
 
             modelBuilder.Entity<Enterprise>()
                 .HasMany(m => m.Drivers)

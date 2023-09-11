@@ -92,10 +92,14 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
+            var driversWithSameEnterprise = _context.Drivers
+                .Where(v => v.EnterpriseId == vehicle.EnterpriseId);
+
             ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
             ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
-            ViewData["Drivers"] = new MultiSelectList(_context.Drivers, "Id", "Name");
+            ViewData["Drivers"] = new MultiSelectList(driversWithSameEnterprise, "Id", "Name");
             vehicle.SelectedDriversIds = vehicle.DriversVehicles.Select(m => m.DriverId).ToList();
+
             return View(vehicle);
         }
 
@@ -119,19 +123,25 @@ namespace CarPark.Controllers
                         .Where(dv => dv.VehicleId == vehicle.Id)
                         .ToListAsync();
 
+                    var validSelectedDriversIds = await _context.Drivers
+                        .Where(d => vehicle.SelectedDriversIds.Any(sdid => sdid == d.Id)
+                            && d.EnterpriseId == vehicle.EnterpriseId)
+                        .Select(d => d.Id)
+                        .ToListAsync();
+
                     foreach (var driverVehicle in driversVehicles)
                     {
-                        if (!vehicle.SelectedDriversIds.Any(id => id == driverVehicle.DriverId))
+                        if (!validSelectedDriversIds.Any(id => id == driverVehicle.DriverId))
                         {
                             _context.DriversVehicles.Remove(driverVehicle);
                         }
                     }
 
-                    foreach (var selectedDriverId in vehicle.SelectedDriversIds)
+                    foreach (var validSelectedDriverId in validSelectedDriversIds)
                     {
-                        if (!driversVehicles.Any(m => m.DriverId == selectedDriverId))
+                        if (!driversVehicles.Any(m => m.DriverId == validSelectedDriverId))
                         {
-                            _context.DriversVehicles.Add(new DriverVehicle { DriverId = selectedDriverId, VehicleId = vehicle.Id });
+                            _context.DriversVehicles.Add(new DriverVehicle { DriverId = validSelectedDriverId, VehicleId = vehicle.Id });
                         }
                     }
 
@@ -152,9 +162,13 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var driversWithSameEnterprise = _context.Drivers
+                .Where(v => v.EnterpriseId == vehicle.EnterpriseId);
+
             ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
             ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
-            ViewData["Drivers"] = new MultiSelectList(_context.Drivers, "Id", "Name");
+            ViewData["Drivers"] = new MultiSelectList(driversWithSameEnterprise, "Id", "Name");
+
             return View(vehicle);
         }
 
@@ -172,6 +186,7 @@ namespace CarPark.Controllers
                 .Include(v => v.DriversVehicles)
                     .ThenInclude(dv => dv.Driver)
                 .FirstOrDefaultAsync(v => v.Id == id);
+
             if (vehicle == null)
             {
                 return NotFound();
