@@ -26,6 +26,12 @@
                 <select asp-for="SelectedVehiclesIds" multiple="multiple" class="form-control" asp-items="ViewBag.Vehicles"></select>
             </div>
             <div class="form-group">
+                <label asp-for="ActiveVehicleId" class="control-label">ActiveVehicle</label>
+                <select asp-for="ActiveVehicleId" class="form-control" asp-items="ViewBag.ActiveVehicle">
+                    <option></option>
+                </select>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>

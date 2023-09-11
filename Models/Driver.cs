@@ -8,17 +8,19 @@ namespace CarPark.Models
     {
         public int Id { get; set; }
         public int EnterpriseId { get; set; }
+        [Column("VehicleId")]
+        public int? ActiveVehicleId { get; set; }
         public string Name { get; set; }
         public int Salary { get; set; }
         [JsonIgnore]
         public Enterprise? Enterprise { get; set; }
         [JsonIgnore]
+        [ForeignKey("ActiveVehicleId")]
+        public Vehicle? ActiveVehicle { get; set; }
+        [JsonIgnore]
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
         [JsonIgnore]
         [NotMapped]
         public List<int> SelectedVehiclesIds { get; set; } = new();
-        //public int? ActiveVehicleId { get; set; }
-        //[JsonIgnore]
-        //public Vehicle? ActiveVehicle { get; set; }
     }
 }

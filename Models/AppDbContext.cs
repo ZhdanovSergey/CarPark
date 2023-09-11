@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 namespace CarPark.Models
 {
@@ -18,17 +19,23 @@ namespace CarPark.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DriverVehicle>()
-                .HasKey(m => new { m.EnterpriseId, m.DriverId, m.VehicleId });
+                .HasKey(dv => new { dv.EnterpriseId, dv.DriverId, dv.VehicleId });
 
             modelBuilder.Entity<Enterprise>()
-                .HasMany(m => m.Drivers)
-                .WithOne(m => m.Enterprise)
+                .HasMany(e => e.Drivers)
+                .WithOne(d => d.Enterprise)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Enterprise>()
-                .HasMany(m => m.Vehicles)
-                .WithOne(m => m.Enterprise)
+                .HasMany(e => e.Vehicles)
+                .WithOne(v => v.Enterprise)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Vehicle>()
+                .HasOne(v => v.ActiveDriver)
+                .WithOne(d => d.ActiveVehicle)
+                .HasForeignKey<Driver>(d => d.ActiveVehicleId)
+                .IsRequired(false);
         }
     }
 }

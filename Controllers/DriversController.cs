@@ -23,7 +23,9 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Drivers
+                .Include(d => d.ActiveVehicle)
                 .Include(d => d.Enterprise);
+
             return View(await appDbContext.ToListAsync());
         }
 
@@ -36,9 +38,10 @@ namespace CarPark.Controllers
             }
 
             var driver = await _context.Drivers
-                .Include(d => d.Enterprise)
+                .Include(d => d.ActiveVehicle)
                 .Include(d => d.DriversVehicles)
                     .ThenInclude(dv => dv.Vehicle)
+                .Include(d => d.Enterprise)
                 .FirstOrDefaultAsync(d => d.Id == id);
             if (driver == null)
             {
@@ -83,7 +86,9 @@ namespace CarPark.Controllers
             }
 
             var driver = await _context.Drivers
+                .Include(d => d.ActiveVehicle)
                 .Include(d => d.DriversVehicles)
+                    .ThenInclude(dv => dv.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (driver == null)
@@ -94,9 +99,12 @@ namespace CarPark.Controllers
             var vehiclesWithSameEnterprise = _context.Vehicles
                 .Where(v => v.EnterpriseId == driver.EnterpriseId);
 
+            var vehiclesAttachedToDriver = driver.DriversVehicles.Select(dv => dv.Vehicle);
+
             ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", driver.EnterpriseId);
             ViewData["Vehicles"] = new MultiSelectList(vehiclesWithSameEnterprise, "Id", "RegistrationNumber");
-            driver.SelectedVehiclesIds = driver.DriversVehicles.Select(m => m.VehicleId).ToList();
+            ViewData["ActiveVehicle"] = new SelectList(vehiclesAttachedToDriver, "Id", "RegistrationNumber", driver.ActiveVehicleId);
+            driver.SelectedVehiclesIds = driver.DriversVehicles.Select(dv => dv.VehicleId).ToList();
 
             return View(driver);
         }
@@ -106,7 +114,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,SelectedVehiclesIds")]  Driver driver)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,SelectedVehiclesIds,ActiveVehicleId")]  Driver driver)
         {
             if (id != driver.Id)
             {
@@ -126,6 +134,10 @@ namespace CarPark.Controllers
                             && v.EnterpriseId == driver.EnterpriseId)
                         .Select(v => v.Id)
                         .ToListAsync();
+
+                    driver.ActiveVehicleId = validSelectedVehiclesIds.Any(svid => svid == driver.ActiveVehicleId)
+                        ? driver.ActiveVehicleId
+                        : null;
 
                     foreach (var driverVehicle in driversVehicles)
                     {
@@ -169,8 +181,11 @@ namespace CarPark.Controllers
             var vehiclesWithSameEnterprise = _context.Vehicles
                 .Where(v => v.EnterpriseId == driver.EnterpriseId);
 
+            var vehiclesAttachedToDriver = driver.DriversVehicles.Select(dv => dv.Vehicle);
+
             ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", driver.EnterpriseId);
             ViewData["Vehicles"] = new MultiSelectList(vehiclesWithSameEnterprise, "Id", "RegistrationNumber");
+            ViewData["ActiveVehicle"] = new SelectList(vehiclesAttachedToDriver, "Id", "RegistrationNumber", driver.ActiveVehicleId);
 
             return View(driver);
         }
@@ -184,6 +199,7 @@ namespace CarPark.Controllers
             }
 
             var driver = await _context.Drivers
+                .Include(v => v.ActiveVehicle)
                 .Include(d => d.Enterprise)
                 .Include(d => d.DriversVehicles)
                     .ThenInclude(dv => dv.Vehicle)
