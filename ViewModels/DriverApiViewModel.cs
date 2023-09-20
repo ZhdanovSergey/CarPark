@@ -1,5 +1,5 @@
 ﻿using CarPark.Models;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarPark.ViewModels
 {
@@ -11,5 +11,14 @@ namespace CarPark.ViewModels
         public int Salary { get; set; }
         public int? ActiveVehicleId { get; set; }
         public List<int> VehiclesIds { get; set; }
+        public DriverApiViewModel(Driver driver)
+        {
+            Id = driver.Id;
+            EnterpriseId = driver.EnterpriseId;
+            Name = driver.Name;
+            Salary = driver.Salary;
+            ActiveVehicleId = driver.ActiveVehicle?.Id;
+            VehiclesIds = driver.DriversVehicles.Select(dv => dv.VehicleId).ToList();
+        }
     }
 }

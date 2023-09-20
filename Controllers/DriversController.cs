@@ -35,9 +35,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Drivers == null)
-            {
                 return NotFound();
-            }
 
             var driver = await _context.Drivers
                 .Include(d => d.ActiveVehicle)
@@ -47,9 +45,7 @@ namespace CarPark.Controllers
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (driver == null)
-            {
                 return NotFound();
-            }
 
             return View(driver);
         }
@@ -84,17 +80,13 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Drivers == null)
-            {
                 return NotFound();
-            }
 
             var driver = await _context.Drivers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (driver == null)
-            {
                 return NotFound();
-            }
 
             return View(await DriverEditViewModel.CreateNewAsync(driver, _context));
         }
@@ -107,9 +99,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,VehiclesIds,ActiveVehicleId")] DriverEditViewModel driverEdit)
         {
             if (id != driverEdit.Id)
-            {
                 return NotFound();
-            }
 
             var driversVehicles = await _context.DriversVehicles
                 .Where(dv => dv.DriverId == driverEdit.Id)
@@ -138,13 +128,12 @@ namespace CarPark.Controllers
                     {
                         if (!driversVehicles.Any(m => m.VehicleId == validSelectedVehicleId))
                         {
-                            _context.DriversVehicles
-                                .Add(new Models.DriverVehicle
-                                {
-                                    EnterpriseId = driverEdit.EnterpriseId,
-                                    DriverId = driverEdit.Id,
-                                    VehicleId = validSelectedVehicleId
-                                });
+                            _context.DriversVehicles.Add(new Models.DriverVehicle
+                            {
+                                EnterpriseId = driverEdit.EnterpriseId,
+                                DriverId = driverEdit.Id,
+                                VehicleId = validSelectedVehicleId
+                            });
                         }
                     }
 
@@ -177,13 +166,9 @@ namespace CarPark.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!DriverExists(driverEdit.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -195,9 +180,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Drivers == null)
-            {
                 return NotFound();
-            }
 
             var driver = await _context.Drivers
                 .Include(v => v.ActiveVehicle)
@@ -205,10 +188,9 @@ namespace CarPark.Controllers
                 .Include(d => d.DriversVehicles)
                     .ThenInclude(dv => dv.Vehicle)
                 .FirstOrDefaultAsync(d => d.Id == id);
+
             if (driver == null)
-            {
                 return NotFound();
-            }
 
             return View(driver);
         }
@@ -219,16 +201,15 @@ namespace CarPark.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Drivers == null)
-            {
                 return Problem("Entity set 'AppDbContext.Driver'  is null.");
-            }
+
             var driver = await _context.Drivers.FindAsync(id);
+
             if (driver != null)
-            {
                 _context.Drivers.Remove(driver);
-            }
-            
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

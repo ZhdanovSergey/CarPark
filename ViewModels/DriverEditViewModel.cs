@@ -1,7 +1,6 @@
 ﻿using CarPark.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CarPark.ViewModels
 {
