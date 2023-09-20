@@ -1,9 +1,8 @@
 ﻿using CarPark.Models;
-using Microsoft.EntityFrameworkCore;
 
-namespace CarPark.ViewModels
+namespace CarPark.APIModels
 {
-    public class DriverApiViewModel
+    public class DriverAPIModel
     {
         public int Id { get; set; }
         public int EnterpriseId { get; set; }
@@ -11,7 +10,7 @@ namespace CarPark.ViewModels
         public int Salary { get; set; }
         public int? ActiveVehicleId { get; set; }
         public List<int> VehiclesIds { get; set; }
-        public DriverApiViewModel(Driver driver)
+        public DriverAPIModel(Driver driver)
         {
             Id = driver.Id;
             EnterpriseId = driver.EnterpriseId;

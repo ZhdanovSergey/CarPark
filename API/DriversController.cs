@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
-using CarPark.ViewModels;
+using CarPark.APIModels;
 
 namespace CarPark.API
 {
@@ -23,7 +23,7 @@ namespace CarPark.API
 
         // GET: api/Drivers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DriverApiViewModel>>> GetDrivers()
+        public async Task<ActionResult<IEnumerable<DriverAPIModel>>> GetDrivers()
         {
             if (_context.Drivers == null)
                 return NotFound();
@@ -34,13 +34,13 @@ namespace CarPark.API
                   .ToListAsync();
 
             return drivers
-                .Select(d => new DriverApiViewModel(d))
+                .Select(d => new DriverAPIModel(d))
                 .ToList();
         }
 
         // GET: api/Drivers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DriverApiViewModel>> GetDriver(int id)
+        public async Task<ActionResult<DriverAPIModel>> GetDriver(int id)
         {
             if (_context.Drivers == null)
                 return NotFound();
@@ -53,7 +53,7 @@ namespace CarPark.API
             if (driver == null)
                 return NotFound();
 
-            return new DriverApiViewModel(driver);
+            return new DriverAPIModel(driver);
         }
 
         // PUT: api/Drivers/5
