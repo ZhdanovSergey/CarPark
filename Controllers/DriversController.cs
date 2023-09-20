@@ -45,6 +45,7 @@ namespace CarPark.Controllers
                     .ThenInclude(dv => dv.Vehicle)
                 .Include(d => d.Enterprise)
                 .FirstOrDefaultAsync(d => d.Id == id);
+
             if (driver == null)
             {
                 return NotFound();
@@ -54,9 +55,9 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name");
+            ViewData["Enterprises"] = new SelectList(await _context.Enterprises.ToListAsync(), "Id", "Name");
             return View();
         }
 
@@ -74,7 +75,7 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", driver.EnterpriseId);
+            ViewData["Enterprises"] = new SelectList(await _context.Enterprises.ToListAsync(), "Id", "Name", driver.EnterpriseId);
 
             return View(driver);
         }
@@ -95,7 +96,7 @@ namespace CarPark.Controllers
                 return NotFound();
             }
 
-            return View(new DriverEditViewModel(driver, _context));
+            return View(await DriverEditViewModel.CreateNewAsync(driver, _context));
         }
 
         // POST: Drivers/Edit/5
@@ -152,8 +153,11 @@ namespace CarPark.Controllers
                         var activeVehicle = await _context.Vehicles
                             .FirstOrDefaultAsync(v => v.Id == driverEdit.ActiveVehicleId);
 
-                        activeVehicle.ActiveDriverId = driverEdit.Id;
-                        _context.Update(activeVehicle);
+                        if (activeVehicle is not null)
+                        {
+                            activeVehicle.ActiveDriverId = driverEdit.Id;
+                            _context.Update(activeVehicle);
+                        }
                     } else
                     {
                         var prevActiveVehicle = await _context.Vehicles
@@ -184,7 +188,7 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(new DriverEditViewModel(driverEdit, _context));
+            return View(await DriverEditViewModel.CreateNewAsync(driverEdit, _context));
         }
 
         // GET: Drivers/Delete/5

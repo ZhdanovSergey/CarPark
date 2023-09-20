@@ -9,6 +9,8 @@ namespace CarPark.Models
     {
         public int Id { get; set; }
         public int EnterpriseId { get; set; }
+        public string Name { get; set; }
+        public int Salary { get; set; }
         [NotMapped]
         public int? ActiveVehicleId
         {
@@ -25,8 +27,6 @@ namespace CarPark.Models
                 return this.DriversVehicles.Select(dv => dv.VehicleId).ToList();
             }
         }
-        public string Name { get; set; }
-        public int Salary { get; set; }
         [JsonIgnore]
         public Vehicle? ActiveVehicle { get; set; }
         [JsonIgnore]

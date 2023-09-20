@@ -57,8 +57,8 @@ namespace CarPark.Controllers
         // GET: Lists/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name");
-            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name");
+            ViewData["Brands"] = new SelectList(await _context.Brands.ToListAsync(), "Id", "Name");
+            ViewData["Enterprises"] = new SelectList(await _context.Enterprises.ToListAsync(), "Id", "Name");
             return View();
         }
 
