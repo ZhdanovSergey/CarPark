@@ -49,7 +49,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -74,7 +74,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
@@ -94,7 +94,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("DriversVehicles");
+                    b.ToTable("DriversVehicles", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.Enterprise", b =>
@@ -115,7 +115,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enterprises");
+                    b.ToTable("Enterprises", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -158,7 +158,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>

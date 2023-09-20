@@ -21,25 +21,22 @@ namespace CarPark.Controllers
         // GET: Brands
         public async Task<IActionResult> Index()
         {
-              return _context.Brands != null ? 
-                          View(await _context.Brands.ToListAsync()) :
-                          Problem("Entity set 'AppDbContext.Brands'  is null.");
+            return _context.Brands != null ? 
+                View(await _context.Brands.ToListAsync()) :
+                Problem("Entity set 'AppDbContext.Brands'  is null.");
         }
 
         // GET: Brands/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Brands == null)
-            {
                 return NotFound();
-            }
 
             var brand = await _context.Brands
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (brand == null)
-            {
                 return NotFound();
-            }
 
             return View(brand);
         }
@@ -61,8 +58,10 @@ namespace CarPark.Controllers
             {
                 _context.Add(brand);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(brand);
         }
 
@@ -70,15 +69,13 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Brands == null)
-            {
                 return NotFound();
-            }
 
             var brand = await _context.Brands.FindAsync(id);
+
             if (brand == null)
-            {
                 return NotFound();
-            }
+
             return View(brand);
         }
 
@@ -90,9 +87,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Type,TankCapacity,LoadCapacity,NumberOfSeats")] Brand brand)
         {
             if (id != brand.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -104,16 +99,14 @@ namespace CarPark.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!BrandExists(brand.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(brand);
         }
 
@@ -121,16 +114,13 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Brands == null)
-            {
                 return NotFound();
-            }
 
             var brand = await _context.Brands
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (brand == null)
-            {
                 return NotFound();
-            }
 
             return View(brand);
         }
@@ -141,16 +131,15 @@ namespace CarPark.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Brands == null)
-            {
                 return Problem("Entity set 'AppDbContext.Brands'  is null.");
-            }
+
             var brand = await _context.Brands.FindAsync(id);
+
             if (brand != null)
-            {
                 _context.Brands.Remove(brand);
-            }
-            
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace CarPark.Models
+﻿namespace CarPark.Models
 {
     public class Brand
     {
@@ -10,7 +8,5 @@ namespace CarPark.Models
         public int LoadCapacity { get; set; }
         public int NumberOfSeats { get; set; }
         public int TankCapacity { get; set; }
-        [JsonIgnore]
-        public List<Vehicle> Vehicles { get; set; }
     }
 }

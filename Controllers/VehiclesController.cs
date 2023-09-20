@@ -21,13 +21,13 @@ namespace CarPark.Controllers
         // GET: Lists
         public async Task<IActionResult> Index()
         {
-              return _context.Vehicles != null ? 
-                          View(await _context.Vehicles
-                            .Include(m => m.ActiveDriver)
-                            .Include(m => m.Brand)
-                            .Include(m => m.Enterprise)
-                            .ToListAsync()) :
-                          Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+            return _context.Vehicles != null ? 
+                View(await _context.Vehicles
+                    .Include(m => m.ActiveDriver)
+                    .Include(m => m.Brand)
+                    .Include(m => m.Enterprise)
+                    .ToListAsync()) :
+                Problem("Entity set 'AppDbContext.Vehicles'  is null.");
         }
 
         // GET: Lists/Details/5

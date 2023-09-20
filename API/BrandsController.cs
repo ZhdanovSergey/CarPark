@@ -24,10 +24,9 @@ namespace CarPark.API
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Brand>>> GetBrands()
         {
-          if (_context.Brands == null)
-          {
-              return NotFound();
-          }
+            if (_context.Brands == null)
+                return NotFound();
+
             return await _context.Brands.ToListAsync();
         }
 
@@ -35,16 +34,13 @@ namespace CarPark.API
         [HttpGet("{id}")]
         public async Task<ActionResult<Brand>> GetBrand(int id)
         {
-          if (_context.Brands == null)
-          {
-              return NotFound();
-          }
+            if (_context.Brands == null)
+                return NotFound();
+
             var brand = await _context.Brands.FindAsync(id);
 
             if (brand == null)
-            {
                 return NotFound();
-            }
 
             return brand;
         }
@@ -55,9 +51,7 @@ namespace CarPark.API
         public async Task<IActionResult> PutBrand(int id, Brand brand)
         {
             if (id != brand.Id)
-            {
                 return BadRequest();
-            }
 
             _context.Entry(brand).State = EntityState.Modified;
 
@@ -68,13 +62,9 @@ namespace CarPark.API
             catch (DbUpdateConcurrencyException)
             {
                 if (!BrandExists(id))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
 
             return NoContent();
@@ -85,10 +75,9 @@ namespace CarPark.API
         [HttpPost]
         public async Task<ActionResult<Brand>> PostBrand(Brand brand)
         {
-          if (_context.Brands == null)
-          {
-              return Problem("Entity set 'AppDbContext.Brands'  is null.");
-          }
+            if (_context.Brands == null)
+                return Problem("Entity set 'AppDbContext.Brands'  is null.");
+
             _context.Brands.Add(brand);
             await _context.SaveChangesAsync();
 
@@ -100,14 +89,12 @@ namespace CarPark.API
         public async Task<IActionResult> DeleteBrand(int id)
         {
             if (_context.Brands == null)
-            {
                 return NotFound();
-            }
+
             var brand = await _context.Brands.FindAsync(id);
+
             if (brand == null)
-            {
                 return NotFound();
-            }
 
             _context.Brands.Remove(brand);
             await _context.SaveChangesAsync();

@@ -14,14 +14,6 @@ namespace CarPark.Models
         public int Mileage { get; set; }
         public int Price { get; set; }
         public int Year { get; set; }
-        [NotMapped]
-        public List<int> DriversIds
-        {
-            get
-            {
-                return this.DriversVehicles.Select(dv => dv.DriverId).ToList();
-            }
-        }
         [JsonIgnore]
         public Brand? Brand { get; set; }
         [JsonIgnore]
@@ -33,5 +25,13 @@ namespace CarPark.Models
         [JsonIgnore]
         [NotMapped]
         public List<int> SelectedDriversIds { get; set; } = new();
+        [NotMapped]
+        public List<int> DriversIds
+        {
+            get
+            {
+                return this.DriversVehicles.Select(dv => dv.DriverId).ToList();
+            }
+        }
     }
 }
