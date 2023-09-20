@@ -15,6 +15,16 @@ namespace CarPark.ViewModels
         public SelectList? EnterprisesSelectList { get; set; }
         public MultiSelectList? VehiclesSelectList { get; set; }
         public SelectList? ActiveVehicleSelectList { get; set; }
+        public DriverEditViewModel() { }
+        public DriverEditViewModel(Driver driver)
+        {
+            Id = driver.Id;
+            Name = driver.Name;
+            Salary = driver.Salary;
+            EnterpriseId = driver.EnterpriseId;
+            VehiclesIds = driver.DriversVehicles.Select(dv => dv.VehicleId).ToList();
+            ActiveVehicleId = driver.ActiveVehicle?.Id;
+        }
         public static explicit operator Driver (DriverEditViewModel driverEdit) => new()
         {
             Id = driverEdit.Id,
@@ -22,74 +32,21 @@ namespace CarPark.ViewModels
             Salary = driverEdit.Salary,
             EnterpriseId = driverEdit.EnterpriseId,
         };
-        public static async Task<DriverEditViewModel> CreateNewAsync (Driver driver, AppDbContext dbContext)
-        {
-            var vehiclesIds = await dbContext.DriversVehicles
-                .Where(dv => dv.DriverId == driver.Id)
-                .Select(dv => dv.VehicleId)
-                .ToListAsync();
-
-            var activeVehicleId = (await dbContext.Drivers
-                .Include(d => d.ActiveVehicle)
-                .FirstOrDefaultAsync(d => d.Id == driver.Id))?.ActiveVehicle?.Id;
-
-            var selectLists = await CreateSelectLists(dbContext, driver.Id, driver.EnterpriseId);
-
-            return new DriverEditViewModel()
-            {
-                Id = driver.Id,
-                Name = driver.Name,
-                Salary = driver.Salary,
-                EnterpriseId = driver.EnterpriseId,
-                VehiclesIds = vehiclesIds,
-                ActiveVehicleId = activeVehicleId,
-                EnterprisesSelectList = selectLists.EnterprisesSelectList,
-                VehiclesSelectList = selectLists.VehiclesSelectList,
-                ActiveVehicleSelectList = selectLists.ActiveVehicleSelectList,
-            };
-        }
-        public static async Task<DriverEditViewModel> CreateNewAsync(DriverEditViewModel driverEdit, AppDbContext dbContext)
-        {
-            var selectLists = await CreateSelectLists(dbContext, driverEdit.Id, driverEdit.EnterpriseId);
-
-            return new DriverEditViewModel()
-            {
-                Id = driverEdit.Id,
-                Name = driverEdit.Name,
-                Salary = driverEdit.Salary,
-                EnterpriseId = driverEdit.EnterpriseId,
-                VehiclesIds = driverEdit.VehiclesIds,
-                ActiveVehicleId = driverEdit.ActiveVehicleId,
-                EnterprisesSelectList = selectLists.EnterprisesSelectList,
-                VehiclesSelectList = selectLists.VehiclesSelectList,
-                ActiveVehicleSelectList = selectLists.ActiveVehicleSelectList,
-
-            };
-        }
-        static async Task<SelectLists> CreateSelectLists(AppDbContext dbContext, int driverId, int enterpriseId)
+        public async Task AddSelectLists(AppDbContext dbContext)
         {
             var vehiclesWithSameEnterprise = await dbContext.Vehicles
-                .Where(v => v.EnterpriseId == enterpriseId)
+                .Where(v => v.EnterpriseId == this.EnterpriseId)
                 .ToListAsync();
 
             var vehiclesAttachedToDriver = await dbContext.DriversVehicles
-                .Where(dv => dv.DriverId == driverId)
+                .Where(dv => dv.DriverId == this.Id)
                 .Include(dv => dv.Vehicle)
                 .Select(dv => dv.Vehicle)
                 .ToListAsync();
 
-            return new SelectLists()
-            {
-                EnterprisesSelectList = new SelectList(await dbContext.Enterprises.ToListAsync(), "Id", "Name"),
-                VehiclesSelectList = new MultiSelectList(vehiclesWithSameEnterprise, "Id", "RegistrationNumber"),
-                ActiveVehicleSelectList = new SelectList(vehiclesAttachedToDriver, "Id", "RegistrationNumber"),
-            };
+            this.EnterprisesSelectList = new SelectList(await dbContext.Enterprises.ToListAsync(), "Id", "Name");
+            this.VehiclesSelectList = new MultiSelectList(vehiclesWithSameEnterprise, "Id", "RegistrationNumber");
+            this.ActiveVehicleSelectList = new SelectList(vehiclesAttachedToDriver, "Id", "RegistrationNumber");
         }
-    }
-    class SelectLists
-    {
-        public SelectList EnterprisesSelectList;
-        public MultiSelectList VehiclesSelectList;
-        public SelectList ActiveVehicleSelectList;
     }
 }

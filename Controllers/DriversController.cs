@@ -83,12 +83,26 @@ namespace CarPark.Controllers
                 return NotFound();
 
             var driver = await _context.Drivers
+                .Include(d => d.DriversVehicles)
+                .Include(d => d.ActiveVehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (driver == null)
                 return NotFound();
 
-            return View(await DriverEditViewModel.CreateNewAsync(driver, _context));
+            var vehiclesIds = await _context.DriversVehicles
+                .Where(dv => dv.DriverId == driver.Id)
+                .Select(dv => dv.VehicleId)
+                .ToListAsync();
+
+            var activeVehicleId = (await _context.Drivers
+                .Include(d => d.ActiveVehicle)
+                .FirstOrDefaultAsync(d => d.Id == driver.Id))?.ActiveVehicle?.Id;
+
+            var driverEdit = new DriverEditViewModel(driver);
+            await driverEdit.AddSelectLists(_context);
+
+            return View(driverEdit);
         }
 
         // POST: Drivers/Edit/5
@@ -170,10 +184,13 @@ namespace CarPark.Controllers
                     else
                         throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(await DriverEditViewModel.CreateNewAsync(driverEdit, _context));
+            await driverEdit.AddSelectLists(_context);
+
+            return View(driverEdit);
         }
 
         // GET: Drivers/Delete/5

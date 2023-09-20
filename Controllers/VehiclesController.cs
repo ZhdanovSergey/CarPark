@@ -34,9 +34,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Vehicles == null)
-            {
                 return NotFound();
-            }
 
             var vehicle = await _context.Vehicles
                 .Include(m => m.ActiveDriver)
@@ -47,9 +45,7 @@ namespace CarPark.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (vehicle == null)
-            {
                 return NotFound();
-            }
 
             return View(vehicle);
         }
@@ -78,6 +74,7 @@ namespace CarPark.Controllers
 
             ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
             ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
+
             return View(vehicle);
         }
 
@@ -85,9 +82,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Vehicles == null)
-            {
                 return NotFound();
-            }
 
             var vehicle = await _context.Vehicles
                 .Include(d => d.DriversVehicles)
@@ -95,9 +90,7 @@ namespace CarPark.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (vehicle == null)
-            {
                 return NotFound();
-            }
 
             var driversWithSameEnterprise = _context.Drivers
                 .Where(v => v.EnterpriseId == vehicle.EnterpriseId);
@@ -124,9 +117,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,SelectedDriversIds,ActiveDriverId")] Vehicle vehicle)
         {
             if (id != vehicle.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -145,22 +136,19 @@ namespace CarPark.Controllers
                     foreach (var driverVehicle in driversVehicles)
                     {
                         if (!validSelectedDriversIds.Any(id => id == driverVehicle.DriverId))
-                        {
                             _context.DriversVehicles.Remove(driverVehicle);
-                        }
                     }
 
                     foreach (var validSelectedDriverId in validSelectedDriversIds)
                     {
                         if (!driversVehicles.Any(m => m.DriverId == validSelectedDriverId))
                         {
-                            _context.DriversVehicles
-                                .Add(new DriverVehicle
-                                {
-                                    EnterpriseId = vehicle.EnterpriseId,
-                                    DriverId = validSelectedDriverId,
-                                    VehicleId = vehicle.Id
-                                });
+                            _context.DriversVehicles.Add(new DriverVehicle
+                            {
+                                EnterpriseId = vehicle.EnterpriseId,
+                                DriverId = validSelectedDriverId,
+                                VehicleId = vehicle.Id
+                            });
                         }
                     }
 
@@ -174,14 +162,11 @@ namespace CarPark.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!VehicleExists(vehicle.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -203,9 +188,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Vehicles == null)
-            {
                 return NotFound();
-            }
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.ActiveDriver)
@@ -216,9 +199,7 @@ namespace CarPark.Controllers
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
-            {
                 return NotFound();
-            }
 
             return View(vehicle);
         }
@@ -229,16 +210,15 @@ namespace CarPark.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Vehicles == null)
-            {
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
-            }
+
             var vehicle = await _context.Vehicles.FindAsync(id);
+
             if (vehicle != null)
-            {
                 _context.Vehicles.Remove(vehicle);
-            }
-            
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
