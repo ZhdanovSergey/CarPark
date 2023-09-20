@@ -14,6 +14,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.City)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Drivers)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Vehicles)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -26,6 +32,18 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.City)
+                </td>
+                <td>
+                    @foreach (var driverName in item.Drivers.Select(d => d.Name))
+                    {
+                        <span>@driverName; </span>
+                    }
+                </td>
+                <td>
+                    @foreach (var vehicleNumber in item.Vehicles.Select(v => v.RegistrationNumber))
+                    {
+                        <span>@vehicleNumber; </span>
+                    }
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

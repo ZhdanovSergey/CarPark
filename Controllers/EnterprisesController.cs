@@ -22,8 +22,11 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Enterprises != null ? 
-                          View(await _context.Enterprises.ToListAsync()) :
-                          Problem("Entity set 'AppDbContext.Enterprise'  is null.");
+                View(await _context.Enterprises
+                .Include(e => e.Drivers)
+                .Include(e => e.Vehicles)
+                .ToListAsync()) :
+                Problem("Entity set 'AppDbContext.Enterprise'  is null.");
         }
 
         // GET: Enterprises/Details/5
@@ -35,7 +38,10 @@ namespace CarPark.Controllers
             }
 
             var enterprise = await _context.Enterprises
+                .Include(e => e.Drivers)
+                .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (enterprise == null)
             {
                 return NotFound();
@@ -126,6 +132,8 @@ namespace CarPark.Controllers
             }
 
             var enterprise = await _context.Enterprises
+                .Include(e => e.Drivers)
+                .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (enterprise == null)
             {

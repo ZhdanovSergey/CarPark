@@ -17,6 +17,24 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.City)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Drivers)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var driverName in Model.Drivers.Select(d => d.Name))
+            {
+                <span>@driverName; </span>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Vehicles)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var vehicleNumber in Model.Vehicles.Select(d => d.RegistrationNumber))
+            {
+                <span>@vehicleNumber; </span>
+            }
+        </dd>
     </dl>
 
     <form asp-action="Delete">

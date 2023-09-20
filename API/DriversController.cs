@@ -11,59 +11,61 @@ namespace CarPark.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VehiclesController : ControllerBase
+    public class DriversController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public VehiclesController(AppDbContext context)
+        public DriversController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Vehicles
+        // GET: api/Drivers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
+        public async Task<ActionResult<IEnumerable<Driver>>> GetDrivers()
         {
-          if (_context.Vehicles == null)
+          if (_context.Drivers == null)
           {
               return NotFound();
           }
-            return await _context.Vehicles
-                .Include(v => v.DriversVehicles)
+            return await _context.Drivers
+                .Include(d => d.ActiveVehicle)
+                .Include(d => d.DriversVehicles)
                 .ToListAsync();
         }
 
-        // GET: api/Vehicles/5
+        // GET: api/Drivers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Vehicle>> GetVehicle(int id)
+        public async Task<ActionResult<Driver>> GetDriver(int id)
         {
-          if (_context.Vehicles == null)
+          if (_context.Drivers == null)
           {
               return NotFound();
           }
-            var vehicle = await _context.Vehicles
-                .Include(v => v.DriversVehicles)
-                .FirstOrDefaultAsync(v => v.Id == id);
+            var driver = await _context.Drivers
+                .Include(d => d.ActiveVehicle)
+                .Include(d => d.DriversVehicles)
+                .FirstOrDefaultAsync(d => d.Id == id);
 
-            if (vehicle == null)
+            if (driver == null)
             {
                 return NotFound();
             }
 
-            return vehicle;
+            return driver;
         }
 
-        // PUT: api/Vehicles/5
+        // PUT: api/Drivers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
+        public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
-            if (id != vehicle.Id)
+            if (id != driver.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(vehicle).State = EntityState.Modified;
+            _context.Entry(driver).State = EntityState.Modified;
 
             try
             {
@@ -71,7 +73,7 @@ namespace CarPark.API
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!VehicleExists(id))
+                if (!DriverExists(id))
                 {
                     return NotFound();
                 }
@@ -84,44 +86,44 @@ namespace CarPark.API
             return NoContent();
         }
 
-        // POST: api/Vehicles
+        // POST: api/Drivers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
+        public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
-          if (_context.Vehicles == null)
+          if (_context.Drivers == null)
           {
-              return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+              return Problem("Entity set 'AppDbContext.Drivers'  is null.");
           }
-            _context.Vehicles.Add(vehicle);
+            _context.Drivers.Add(driver);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVehicle", new { id = vehicle.Id }, vehicle);
+            return CreatedAtAction("GetDriver", new { id = driver.Id }, driver);
         }
 
-        // DELETE: api/Vehicles/5
+        // DELETE: api/Drivers/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicle(int id)
+        public async Task<IActionResult> DeleteDriver(int id)
         {
-            if (_context.Vehicles == null)
+            if (_context.Drivers == null)
             {
                 return NotFound();
             }
-            var vehicle = await _context.Vehicles.FindAsync(id);
-            if (vehicle == null)
+            var driver = await _context.Drivers.FindAsync(id);
+            if (driver == null)
             {
                 return NotFound();
             }
 
-            _context.Vehicles.Remove(vehicle);
+            _context.Drivers.Remove(driver);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool VehicleExists(int id)
+        private bool DriverExists(int id)
         {
-            return (_context.Vehicles?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Drivers?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model CarPark.Models.Driver
+﻿@model CarPark.ViewModels.DriverEditViewModel
 
 <h4>Driver</h4>
 <hr />
@@ -19,15 +19,15 @@
             </div>
             <div class="form-group">
                 <label asp-for="EnterpriseId" class="control-label">Enterprise</label>
-                <select asp-for="EnterpriseId" class="form-control" asp-items="ViewBag.Enterprises"></select>
+                <select asp-for="EnterpriseId" class="form-control" asp-items="Model.EnterprisesSelectList"></select>
             </div>
             <div class="form-group">
-                <label asp-for="SelectedVehiclesIds" class="control-label">Vehicles</label>
-                <select asp-for="SelectedVehiclesIds" multiple="multiple" class="form-control" asp-items="ViewBag.Vehicles"></select>
+                <label asp-for="VehiclesIds" class="control-label">Vehicles</label>
+                <select asp-for="VehiclesIds" multiple="multiple" class="form-control" asp-items="Model.VehiclesSelectList"></select>
             </div>
             <div class="form-group">
                 <label asp-for="ActiveVehicleId" class="control-label">ActiveVehicle</label>
-                <select asp-for="ActiveVehicleId" class="form-control" asp-items="ViewBag.ActiveVehicle">
+                <select asp-for="ActiveVehicleId" class="form-control" asp-items="Model.ActiveVehicleSelectList">
                     <option></option>
                 </select>
             </div>
