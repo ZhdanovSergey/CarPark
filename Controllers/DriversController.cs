@@ -171,7 +171,7 @@ namespace CarPark.Controllers
 
                     }
 
-                    _context.Update(new Driver(driverEdit));
+                    _context.Update((Driver)driverEdit);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

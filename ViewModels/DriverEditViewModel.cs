@@ -16,7 +16,13 @@ namespace CarPark.ViewModels
         public SelectList? EnterprisesSelectList { get; set; }
         public MultiSelectList? VehiclesSelectList { get; set; }
         public SelectList? ActiveVehicleSelectList { get; set; }
-        public DriverEditViewModel() { }
+        public static explicit operator Driver (DriverEditViewModel driverEdit) => new()
+        {
+            Id = driverEdit.Id,
+            Name = driverEdit.Name,
+            Salary = driverEdit.Salary,
+            EnterpriseId = driverEdit.EnterpriseId,
+        };
         public static async Task<DriverEditViewModel> CreateNewAsync (Driver driver, AppDbContext dbContext)
         {
             var vehiclesIds = await dbContext.DriversVehicles
@@ -75,7 +81,7 @@ namespace CarPark.ViewModels
 
             return new SelectLists()
             {
-                EnterprisesSelectList = new SelectList(dbContext.Enterprises, "Id", "Name"),
+                EnterprisesSelectList = new SelectList(await dbContext.Enterprises.ToListAsync(), "Id", "Name"),
                 VehiclesSelectList = new MultiSelectList(vehiclesWithSameEnterprise, "Id", "RegistrationNumber"),
                 ActiveVehicleSelectList = new SelectList(vehiclesAttachedToDriver, "Id", "RegistrationNumber"),
             };

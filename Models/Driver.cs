@@ -33,13 +33,5 @@ namespace CarPark.Models
         public Enterprise? Enterprise { get; set; }
         [JsonIgnore]
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
-        public Driver() { }
-        public Driver(DriverEditViewModel driverEdit)
-        {
-            Id = driverEdit.Id;
-            Name = driverEdit.Name;
-            Salary = driverEdit.Salary;
-            EnterpriseId = driverEdit.EnterpriseId;
-        }
     }
 }
