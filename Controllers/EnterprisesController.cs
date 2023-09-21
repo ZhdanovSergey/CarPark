@@ -21,11 +21,11 @@ namespace CarPark.Controllers
         // GET: Enterprises
         public async Task<IActionResult> Index()
         {
-              return _context.Enterprises != null ? 
+            return _context.Enterprises != null ?
                 View(await _context.Enterprises
-                .Include(e => e.Drivers)
-                .Include(e => e.Vehicles)
-                .ToListAsync()) :
+                    .Include(e => e.Drivers)
+                    .Include(e => e.Vehicles)
+                    .ToListAsync()) :
                 Problem("Entity set 'AppDbContext.Enterprise'  is null.");
         }
 
@@ -33,9 +33,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Enterprises == null)
-            {
                 return NotFound();
-            }
 
             var enterprise = await _context.Enterprises
                 .Include(e => e.Drivers)
@@ -43,9 +41,7 @@ namespace CarPark.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (enterprise == null)
-            {
                 return NotFound();
-            }
 
             return View(enterprise);
         }
@@ -69,6 +65,7 @@ namespace CarPark.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(enterprise);
         }
 
@@ -76,15 +73,13 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Enterprises == null)
-            {
                 return NotFound();
-            }
 
             var enterprise = await _context.Enterprises.FindAsync(id);
+
             if (enterprise == null)
-            {
                 return NotFound();
-            }
+
             return View(enterprise);
         }
 
@@ -96,9 +91,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Enterprise enterprise)
         {
             if (id != enterprise.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -110,16 +103,14 @@ namespace CarPark.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!EnterpriseExists(enterprise.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(enterprise);
         }
 
@@ -127,18 +118,15 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Enterprises == null)
-            {
                 return NotFound();
-            }
 
             var enterprise = await _context.Enterprises
                 .Include(e => e.Drivers)
                 .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (enterprise == null)
-            {
                 return NotFound();
-            }
 
             return View(enterprise);
         }
@@ -149,16 +137,15 @@ namespace CarPark.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Enterprises == null)
-            {
                 return Problem("Entity set 'AppDbContext.Enterprise'  is null.");
-            }
+
             var enterprise = await _context.Enterprises.FindAsync(id);
+
             if (enterprise != null)
-            {
                 _context.Enterprises.Remove(enterprise);
-            }
-            
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

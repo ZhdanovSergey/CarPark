@@ -8,27 +8,8 @@ namespace CarPark.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string City { get; set; }
-        [NotMapped]
-        public List<int> DriversIds
-        {
-            get
-            {
-                return this.Drivers.Select(d => d.Id).ToList();
-            }
-        }
-        [NotMapped]
-        public List<int> VehiclesIds
-        {
-            get
-            {
-                return this.Vehicles.Select(v => v.Id).ToList();
-            }
-        }
-        [JsonIgnore]
         public List<Driver> Drivers { get; set; } = new();
-        [JsonIgnore]
         public List<Vehicle> Vehicles { get; set; } = new();
-        [JsonIgnore]
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
     }
 }
