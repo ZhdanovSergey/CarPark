@@ -1,5 +1,4 @@
-﻿@using CarPark.Models
-@model CarPark.Models.Vehicle
+﻿@model CarPark.ViewModels.VehicleViewModel
 
 <h4>Vehicle</h4>
 <hr />
@@ -14,11 +13,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="EnterpriseId" class="control-label">Enterprise</label>
-                <select asp-for="EnterpriseId" class="form-control" asp-items="ViewBag.Enterprises"></select>
+                <select asp-for="EnterpriseId" class="form-control" asp-items="Model.EnterprisesSelectList"></select>
             </div>
             <div class="form-group">
                 <label asp-for="BrandId" class="control-label">Brand</label>
-                <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands"></select>
+                <select asp-for="BrandId" class="form-control" asp-items="Model.BrandsSelectList"></select>
             </div>
             <div class="form-group">
                 <label asp-for="Mileage" class="control-label"></label>

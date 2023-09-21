@@ -1,5 +1,4 @@
-﻿@using CarPark.Models
-@model CarPark.Models.Vehicle
+﻿@model CarPark.ViewModels.VehicleViewModel
 
 <h4>Vehicle</h4>
 <hr />
@@ -15,11 +14,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="EnterpriseId" class="control-label">Enterprise</label>
-                <select asp-for="EnterpriseId" class="form-control" asp-items="ViewBag.Enterprises"></select>
+                <select asp-for="EnterpriseId" class="form-control" asp-items="Model.EnterprisesSelectList"></select>
             </div>
             <div class="form-group">
                 <label asp-for="BrandId" class="control-label">Brand</label>
-                <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands"></select>
+                <select asp-for="BrandId" class="form-control" asp-items="Model.BrandsSelectList"></select>
             </div>
             <div class="form-group">
                 <label asp-for="Mileage" class="control-label"></label>
@@ -37,12 +36,12 @@
                 <span asp-validation-for="Year" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SelectedDriversIds" class="control-label">Drivers</label>
-                <select asp-for="SelectedDriversIds" multiple="multiple" class="form-control" asp-items="ViewBag.Drivers"></select>
+                <label asp-for="DriversIds" class="control-label">Drivers</label>
+                <select asp-for="DriversIds" multiple="multiple" class="form-control" asp-items="Model.DriversSelectList"></select>
             </div>
             <div class="form-group">
                 <label asp-for="ActiveDriverId" class="control-label">ActiveDriver</label>
-                <select asp-for="ActiveDriverId" class="form-control" asp-items="ViewBag.ActiveDriver">
+                <select asp-for="ActiveDriverId" class="form-control" asp-items="Model.ActiveDriverSelectList">
                     <option></option>
                 </select>
             </div>

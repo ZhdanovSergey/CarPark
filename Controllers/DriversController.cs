@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.Migrations;
@@ -53,8 +52,10 @@ namespace CarPark.Controllers
         // GET: Drivers/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["Enterprises"] = new SelectList(await _context.Enterprises.ToListAsync(), "Id", "Name");
-            return View();
+            var driverVM = new DriverViewModel();
+            await driverVM.AddCreateSelectLists(_context);
+
+            return View(driverVM);
         }
 
         // POST: Drivers/Create
@@ -62,18 +63,19 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EnterpriseId,Name,Salary")] Driver driver)
+        public async Task<IActionResult> Create([Bind("Id,Name,Salary,EnterpriseId")] DriverViewModel driverVM)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(driver);
+                _context.Add(new Driver(driverVM));
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Enterprises"] = new SelectList(await _context.Enterprises.ToListAsync(), "Id", "Name", driver.EnterpriseId);
+            await driverVM.AddCreateSelectLists(_context);
 
-            return View(driver);
+            return View(driverVM);
         }
 
         // GET: Drivers/Edit/5
@@ -99,10 +101,10 @@ namespace CarPark.Controllers
                 .Include(d => d.ActiveVehicle)
                 .FirstOrDefaultAsync(d => d.Id == driver.Id))?.ActiveVehicle?.Id;
 
-            var driverEdit = new DriverEditViewModel(driver);
-            await driverEdit.AddSelectLists(_context);
+            var driverVM = new DriverViewModel(driver);
+            await driverVM.AddEditSelectLists(_context);
 
-            return View(driverEdit);
+            return View(driverVM);
         }
 
         // POST: Drivers/Edit/5
@@ -110,13 +112,13 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,VehiclesIds,ActiveVehicleId")] DriverEditViewModel driverEdit)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,VehiclesIds,ActiveVehicleId")] DriverViewModel driverVM)
         {
-            if (id != driverEdit.Id)
+            if (id != driverVM.Id)
                 return NotFound();
 
             var driversVehicles = await _context.DriversVehicles
-                .Where(dv => dv.DriverId == driverEdit.Id)
+                .Where(dv => dv.DriverId == driverVM.Id)
                 .ToListAsync();
 
             if (ModelState.IsValid)
@@ -124,14 +126,14 @@ namespace CarPark.Controllers
                 try
                 {
                     var validSelectedVehiclesIds = await _context.Vehicles
-                        .Where(v => driverEdit.VehiclesIds.Any(svid => svid == v.Id)
-                            && v.EnterpriseId == driverEdit.EnterpriseId)
+                        .Where(v => driverVM.VehiclesIds.Any(svid => svid == v.Id)
+                            && v.EnterpriseId == driverVM.EnterpriseId)
                         .Select(v => v.Id)
                         .ToListAsync();
 
                     foreach (var driverVehicle in driversVehicles)
                     {
-                        if (driverVehicle.EnterpriseId != driverEdit.EnterpriseId
+                        if (driverVehicle.EnterpriseId != driverVM.EnterpriseId
                             || !validSelectedVehiclesIds.Any(id => id == driverVehicle.VehicleId))
                         {
                             _context.DriversVehicles.Remove(driverVehicle);
@@ -144,27 +146,27 @@ namespace CarPark.Controllers
                         {
                             _context.DriversVehicles.Add(new Models.DriverVehicle
                             {
-                                EnterpriseId = driverEdit.EnterpriseId,
-                                DriverId = driverEdit.Id,
+                                EnterpriseId = driverVM.EnterpriseId,
+                                DriverId = driverVM.Id,
                                 VehicleId = validSelectedVehicleId
                             });
                         }
                     }
 
-                    if (validSelectedVehiclesIds.Any(svid => svid == driverEdit.ActiveVehicleId))
+                    if (validSelectedVehiclesIds.Any(svid => svid == driverVM.ActiveVehicleId))
                     {
                         var activeVehicle = await _context.Vehicles
-                            .FirstOrDefaultAsync(v => v.Id == driverEdit.ActiveVehicleId);
+                            .FirstOrDefaultAsync(v => v.Id == driverVM.ActiveVehicleId);
 
                         if (activeVehicle is not null)
                         {
-                            activeVehicle.ActiveDriverId = driverEdit.Id;
+                            activeVehicle.ActiveDriverId = driverVM.Id;
                             _context.Update(activeVehicle);
                         }
                     } else
                     {
                         var prevActiveVehicle = await _context.Vehicles
-                            .FirstOrDefaultAsync(v => v.ActiveDriverId == driverEdit.Id);
+                            .FirstOrDefaultAsync(v => v.ActiveDriverId == driverVM.Id);
 
                         if (prevActiveVehicle != null)
                         {
@@ -174,12 +176,12 @@ namespace CarPark.Controllers
 
                     }
 
-                    _context.Update((Driver)driverEdit);
+                    _context.Update(new Driver(driverVM));
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DriverExists(driverEdit.Id))
+                    if (!DriverExists(driverVM.Id))
                         return NotFound();
                     else
                         throw;
@@ -188,9 +190,9 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await driverEdit.AddSelectLists(_context);
+            await driverVM.AddEditSelectLists(_context);
 
-            return View(driverEdit);
+            return View(driverVM);
         }
 
         // GET: Drivers/Delete/5

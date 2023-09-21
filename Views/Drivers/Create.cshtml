@@ -1,4 +1,4 @@
-﻿@model CarPark.Models.Driver
+﻿@model CarPark.ViewModels.DriverViewModel
 
 <h4>Driver</h4>
 <hr />
@@ -18,7 +18,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="EnterpriseId" class="control-label">Enterprise</label>
-                <select asp-for="EnterpriseId" class="form-control" asp-items="ViewBag.Enterprises"></select>
+                <select asp-for="EnterpriseId" class="form-control" asp-items="Model.EnterprisesSelectList"></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

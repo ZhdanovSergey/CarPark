@@ -9,7 +9,7 @@ namespace CarPark.APIModels
         public string Name { get; set; }
         public int Salary { get; set; }
         public int? ActiveVehicleId { get; set; }
-        public List<int> VehiclesIds { get; set; }
+        public List<int> VehiclesIds { get; set; } = new();
         public DriverAPIModel(Driver driver)
         {
             Id = driver.Id;

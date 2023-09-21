@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
+using CarPark.ViewModels;
 
 namespace CarPark.Controllers
 {
@@ -53,9 +53,10 @@ namespace CarPark.Controllers
         // GET: Lists/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["Brands"] = new SelectList(await _context.Brands.ToListAsync(), "Id", "Name");
-            ViewData["Enterprises"] = new SelectList(await _context.Enterprises.ToListAsync(), "Id", "Name");
-            return View();
+            var vehicleVM = new VehicleViewModel();
+            await vehicleVM.AddCreateSelectLists(_context);
+
+            return View(vehicleVM);
         }
 
         // POST: Lists/Create
@@ -63,19 +64,20 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage")] Vehicle vehicle)
+        public async Task<IActionResult> Create([Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage")] VehicleViewModel vehicleVM)
         {
             if (ModelState.IsValid)
             {
+                var vehicle = new Vehicle(vehicleVM);
                 _context.Add(vehicle);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
-            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
+            await vehicleVM.AddCreateSelectLists(_context);
 
-            return View(vehicle);
+            return View(vehicleVM);
         }
 
         // GET: Lists/Edit/5
@@ -92,21 +94,10 @@ namespace CarPark.Controllers
             if (vehicle == null)
                 return NotFound();
 
-            var driversWithSameEnterprise = _context.Drivers
-                .Where(v => v.EnterpriseId == vehicle.EnterpriseId);
+            var vehicleVM = new VehicleViewModel(vehicle);
+            await vehicleVM.AddEditSelectLists(_context);
 
-            var driversAttachedToVehicle = vehicle.DriversVehicles
-                .Select(dv => dv.Driver);
-
-            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
-            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
-            ViewData["Drivers"] = new MultiSelectList(driversWithSameEnterprise, "Id", "Name");
-            ViewData["ActiveDriver"] = new SelectList(driversAttachedToVehicle, "Id", "Name", vehicle.ActiveDriverId);
-
-            vehicle.SelectedDriversIds = vehicle.DriversVehicles
-                .Select(m => m.DriverId).ToList();
-
-            return View(vehicle);
+            return View(vehicleVM);
         }
 
         // POST: Lists/Edit/5
@@ -114,9 +105,9 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,SelectedDriversIds,ActiveDriverId")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,DriversIds,ActiveDriverId")] VehicleViewModel vehicleVM)
         {
-            if (id != vehicle.Id)
+            if (id != vehicleVM.Id)
                 return NotFound();
 
             if (ModelState.IsValid)
@@ -124,12 +115,12 @@ namespace CarPark.Controllers
                 try
                 {
                     var driversVehicles = await _context.DriversVehicles
-                        .Where(dv => dv.VehicleId == vehicle.Id)
+                        .Where(dv => dv.VehicleId == vehicleVM.Id)
                         .ToListAsync();
 
                     var validSelectedDriversIds = await _context.Drivers
-                        .Where(d => vehicle.SelectedDriversIds.Any(sdid => sdid == d.Id)
-                            && d.EnterpriseId == vehicle.EnterpriseId)
+                        .Where(d => vehicleVM.DriversIds.Any(sdid => sdid == d.Id)
+                            && d.EnterpriseId == vehicleVM.EnterpriseId)
                         .Select(d => d.Id)
                         .ToListAsync();
 
@@ -145,23 +136,23 @@ namespace CarPark.Controllers
                         {
                             _context.DriversVehicles.Add(new DriverVehicle
                             {
-                                EnterpriseId = vehicle.EnterpriseId,
+                                EnterpriseId = vehicleVM.EnterpriseId,
                                 DriverId = validSelectedDriverId,
-                                VehicleId = vehicle.Id
+                                VehicleId = vehicleVM.Id
                             });
                         }
                     }
 
-                    vehicle.ActiveDriverId = validSelectedDriversIds.Any(sdid => sdid == vehicle.ActiveDriverId)
-                        ? vehicle.ActiveDriverId
+                    vehicleVM.ActiveDriverId = validSelectedDriversIds.Any(sdid => sdid == vehicleVM.ActiveDriverId)
+                        ? vehicleVM.ActiveDriverId
                         : null;
 
-                    _context.Update(vehicle);
+                    _context.Update(new Vehicle(vehicleVM));
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VehicleExists(vehicle.Id))
+                    if (!VehicleExists(vehicleVM.Id))
                         return NotFound();
                     else
                         throw;
@@ -170,18 +161,9 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var driversWithSameEnterprise = _context.Drivers
-                .Where(v => v.EnterpriseId == vehicle.EnterpriseId);
+            await vehicleVM.AddEditSelectLists(_context);
 
-            var driversAttachedToVehicle = vehicle.DriversVehicles
-                .Select(dv => dv.Driver);
-
-            ViewData["Brands"] = new SelectList(_context.Brands, "Id", "Name", vehicle.BrandId);
-            ViewData["Enterprises"] = new SelectList(_context.Enterprises, "Id", "Name", vehicle.EnterpriseId);
-            ViewData["Drivers"] = new MultiSelectList(driversWithSameEnterprise, "Id", "Name");
-            ViewData["ActiveDriver"] = new SelectList(driversAttachedToVehicle, "Id", "Name", vehicle.ActiveDriverId);
-
-            return View(vehicle);
+            return View(vehicleVM);
         }
 
         // GET: Lists/Delete/5

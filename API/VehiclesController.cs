@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
+using CarPark.APIModels;
 
 namespace CarPark.API
 {
@@ -22,35 +23,35 @@ namespace CarPark.API
 
         // GET: api/Vehicles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
+        public async Task<ActionResult<IEnumerable<VehicleAPIModel>>> GetVehicles()
         {
-          if (_context.Vehicles == null)
-          {
-              return NotFound();
-          }
-            return await _context.Vehicles
+            if (_context.Vehicles == null)
+                return NotFound();
+
+            var vehicles = await _context.Vehicles
                 .Include(v => v.DriversVehicles)
                 .ToListAsync();
+
+            return vehicles
+                .Select(v => new VehicleAPIModel(v))
+                .ToList();
         }
 
         // GET: api/Vehicles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Vehicle>> GetVehicle(int id)
+        public async Task<ActionResult<VehicleAPIModel>> GetVehicle(int id)
         {
           if (_context.Vehicles == null)
-          {
-              return NotFound();
-          }
+                return NotFound();
+
             var vehicle = await _context.Vehicles
                 .Include(v => v.DriversVehicles)
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
-            {
                 return NotFound();
-            }
 
-            return vehicle;
+            return new VehicleAPIModel(vehicle);
         }
 
         // PUT: api/Vehicles/5
@@ -59,9 +60,7 @@ namespace CarPark.API
         public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
             if (id != vehicle.Id)
-            {
                 return BadRequest();
-            }
 
             _context.Entry(vehicle).State = EntityState.Modified;
 
@@ -72,13 +71,9 @@ namespace CarPark.API
             catch (DbUpdateConcurrencyException)
             {
                 if (!VehicleExists(id))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
 
             return NoContent();
@@ -89,10 +84,9 @@ namespace CarPark.API
         [HttpPost]
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
-          if (_context.Vehicles == null)
-          {
-              return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
-          }
+            if (_context.Vehicles == null)
+                return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+
             _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
 
@@ -104,14 +98,12 @@ namespace CarPark.API
         public async Task<IActionResult> DeleteVehicle(int id)
         {
             if (_context.Vehicles == null)
-            {
                 return NotFound();
-            }
+
             var vehicle = await _context.Vehicles.FindAsync(id);
+
             if (vehicle == null)
-            {
                 return NotFound();
-            }
 
             _context.Vehicles.Remove(vehicle);
             await _context.SaveChangesAsync();

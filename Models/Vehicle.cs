@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using CarPark.ViewModels;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace CarPark.Models
@@ -13,24 +14,21 @@ namespace CarPark.Models
         public int Mileage { get; set; }
         public int Price { get; set; }
         public int Year { get; set; }
-        [JsonIgnore]
         public Brand? Brand { get; set; }
-        [JsonIgnore]
         public Driver? ActiveDriver { get; set; }
-        [JsonIgnore]
         public Enterprise? Enterprise { get; set; }
-        [JsonIgnore]
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
-        [JsonIgnore]
-        [NotMapped]
-        public List<int> SelectedDriversIds { get; set; } = new();
-        [NotMapped]
-        public List<int> DriversIds
+        public Vehicle() { }
+        public Vehicle(VehicleViewModel vehicleEdit)
         {
-            get
-            {
-                return this.DriversVehicles.Select(dv => dv.DriverId).ToList();
-            }
+            Id = vehicleEdit.Id;
+            ActiveDriverId = vehicleEdit.ActiveDriverId;
+            BrandId = vehicleEdit.BrandId;
+            EnterpriseId = vehicleEdit.EnterpriseId;
+            RegistrationNumber = vehicleEdit.RegistrationNumber;
+            Mileage = vehicleEdit.Mileage;
+            Price = vehicleEdit.Price;
+            Year = vehicleEdit.Year;
         }
     }
 }
