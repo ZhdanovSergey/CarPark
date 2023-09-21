@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
-using CarPark.Migrations;
 using CarPark.ViewModels;
 
 namespace CarPark.Controllers
@@ -117,43 +116,27 @@ namespace CarPark.Controllers
             if (id != driverVM.Id)
                 return NotFound();
 
-            var driversVehicles = await _context.DriversVehicles
-                .Where(dv => dv.DriverId == driverVM.Id)
-                .ToListAsync();
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var validSelectedVehiclesIds = await _context.Vehicles
-                        .Where(v => driverVM.VehiclesIds.Any(svid => svid == v.Id)
-                            && v.EnterpriseId == driverVM.EnterpriseId)
-                        .Select(v => v.Id)
+                    var oldDriversVehicles = await _context.DriversVehicles
+                        .Where(dv => dv.DriverId == driverVM.Id)
                         .ToListAsync();
 
-                    foreach (var driverVehicle in driversVehicles)
-                    {
-                        if (driverVehicle.EnterpriseId != driverVM.EnterpriseId
-                            || !validSelectedVehiclesIds.Any(id => id == driverVehicle.VehicleId))
+                    var newDriversVehicles = await _context.Vehicles
+                        .Where(vehicle => vehicle.EnterpriseId == driverVM.EnterpriseId
+                            && driverVM.VehiclesIds.Any(vid => vid == vehicle.Id))
+                        .Select(vehicle => new DriverVehicle
                         {
-                            _context.DriversVehicles.Remove(driverVehicle);
-                        }
-                    }
+                            EnterpriseId = driverVM.EnterpriseId,
+                            DriverId = driverVM.Id,
+                            VehicleId = vehicle.Id,
+                        }).ToListAsync();
 
-                    foreach (var validSelectedVehicleId in validSelectedVehiclesIds)
-                    {
-                        if (!driversVehicles.Any(m => m.VehicleId == validSelectedVehicleId))
-                        {
-                            _context.DriversVehicles.Add(new Models.DriverVehicle
-                            {
-                                EnterpriseId = driverVM.EnterpriseId,
-                                DriverId = driverVM.Id,
-                                VehicleId = validSelectedVehicleId
-                            });
-                        }
-                    }
+                    DriverVehicle.Update(_context, oldDriversVehicles, newDriversVehicles, DriverVehicleIdProp.VehicleId);
 
-                    if (validSelectedVehiclesIds.Any(svid => svid == driverVM.ActiveVehicleId))
+                    if (newDriversVehicles.Any(dv => dv.VehicleId == driverVM.ActiveVehicleId))
                     {
                         var activeVehicle = await _context.Vehicles
                             .FirstOrDefaultAsync(v => v.Id == driverVM.ActiveVehicleId);

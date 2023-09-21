@@ -12,12 +12,12 @@ namespace CarPark.Models
         public Enterprise? Enterprise { get; set; }
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
         public Driver() { }
-        public Driver(DriverViewModel driverEdit)
+        public Driver(DriverViewModel driverVM)
         {
-            Id = driverEdit.Id;
-            Name = driverEdit.Name;
-            Salary = driverEdit.Salary;
-            EnterpriseId = driverEdit.EnterpriseId;
+            Id = driverVM.Id;
+            Name = driverVM.Name;
+            Salary = driverVM.Salary;
+            EnterpriseId = driverVM.EnterpriseId;
         }
     }
 }

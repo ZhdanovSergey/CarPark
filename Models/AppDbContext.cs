@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CarPark.Migrations;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 
 namespace CarPark.Models
@@ -10,7 +11,6 @@ namespace CarPark.Models
         public DbSet<DriverVehicle> DriversVehicles { get; set; }
         public DbSet<Enterprise> Enterprises { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb; Database=CarParkDB; Trusted_Connection=True");

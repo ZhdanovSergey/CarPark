@@ -19,16 +19,16 @@ namespace CarPark.Models
         public Enterprise? Enterprise { get; set; }
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
         public Vehicle() { }
-        public Vehicle(VehicleViewModel vehicleEdit)
+        public Vehicle(VehicleViewModel vehicleVM)
         {
-            Id = vehicleEdit.Id;
-            ActiveDriverId = vehicleEdit.ActiveDriverId;
-            BrandId = vehicleEdit.BrandId;
-            EnterpriseId = vehicleEdit.EnterpriseId;
-            RegistrationNumber = vehicleEdit.RegistrationNumber;
-            Mileage = vehicleEdit.Mileage;
-            Price = vehicleEdit.Price;
-            Year = vehicleEdit.Year;
+            Id = vehicleVM.Id;
+            ActiveDriverId = vehicleVM.ActiveDriverId;
+            BrandId = vehicleVM.BrandId;
+            EnterpriseId = vehicleVM.EnterpriseId;
+            RegistrationNumber = vehicleVM.RegistrationNumber;
+            Mileage = vehicleVM.Mileage;
+            Price = vehicleVM.Price;
+            Year = vehicleVM.Year;
         }
     }
 }
