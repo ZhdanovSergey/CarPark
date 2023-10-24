@@ -11,9 +11,9 @@ namespace CarPark.Controllers
 {
     public class BrandsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public BrandsController(AppDbContext context)
+        public BrandsController(ApplicationDbContext context)
         {
             _context = context;
         }

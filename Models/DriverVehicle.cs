@@ -13,7 +13,7 @@ namespace CarPark.Models
         public Enterprise? Enterprise { get; set; }
         public Driver? Driver { get; set; }
         public Vehicle? Vehicle { get; set; }
-        public static void Update(AppDbContext dbContext, IEnumerable<DriverVehicle> oldData, IEnumerable<DriverVehicle> newData, DriverVehicleIdProp comparedIdProp)
+        public static void Update(ApplicationDbContext dbContext, IEnumerable<DriverVehicle> oldData, IEnumerable<DriverVehicle> newData, DriverVehicleIdProp comparedIdProp)
         {
             foreach (var oldDataItem in oldData)
             {

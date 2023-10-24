@@ -11,9 +11,9 @@ namespace CarPark.Controllers
 {
     public class VehiclesController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public VehiclesController(AppDbContext context)
+        public VehiclesController(ApplicationDbContext context)
         {
             _context = context;
         }

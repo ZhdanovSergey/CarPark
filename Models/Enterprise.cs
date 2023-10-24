@@ -11,5 +11,6 @@ namespace CarPark.Models
         public List<Driver> Drivers { get; set; } = new();
         public List<Vehicle> Vehicles { get; set; } = new();
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
+        public List<EnterpriseManager> EnterprisesManagers { get; set; } = new();
     }
 }

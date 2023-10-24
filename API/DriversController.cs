@@ -14,9 +14,9 @@ namespace CarPark.API
     [ApiController]
     public class DriversController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public DriversController(AppDbContext context)
+        public DriversController(ApplicationDbContext context)
         {
             _context = context;
         }

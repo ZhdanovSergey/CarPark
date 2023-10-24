@@ -25,11 +25,11 @@ namespace CarPark.ViewModels
             VehiclesIds = driver.DriversVehicles.Select(dv => dv.VehicleId).ToList();
             ActiveVehicleId = driver.ActiveVehicle?.Id;
         }
-        public async Task AddCreateSelectLists(AppDbContext dbContext)
+        public async Task AddCreateSelectLists(ApplicationDbContext dbContext)
         {
             this.EnterprisesSelectList = new SelectList(await dbContext.Enterprises.ToListAsync(), "Id", "Name");
         }
-        public async Task AddEditSelectLists(AppDbContext dbContext)
+        public async Task AddEditSelectLists(ApplicationDbContext dbContext)
         {
             await this.AddCreateSelectLists(dbContext);
 

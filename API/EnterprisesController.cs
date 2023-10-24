@@ -14,9 +14,9 @@ namespace CarPark.API
     [ApiController]
     public class EnterprisesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public EnterprisesController(AppDbContext context)
+        public EnterprisesController(ApplicationDbContext context)
         {
             _context = context;
         }

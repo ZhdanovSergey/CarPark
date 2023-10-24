@@ -33,12 +33,12 @@ namespace CarPark.ViewModels
             Year = vehicle.Year;
             DriversIds = vehicle.DriversVehicles.Select(dv => dv.DriverId).ToList();
         }
-        public async Task AddCreateSelectLists(AppDbContext dbContext)
+        public async Task AddCreateSelectLists(ApplicationDbContext dbContext)
         {
             this.BrandsSelectList = new SelectList(await dbContext.Brands.ToListAsync(), "Id", "Name", this.BrandId);
             this.EnterprisesSelectList = new SelectList(await dbContext.Enterprises.ToListAsync(), "Id", "Name", this.EnterpriseId);
         }
-        public async Task AddEditSelectLists(AppDbContext dbContext)
+        public async Task AddEditSelectLists(ApplicationDbContext dbContext)
         {
             await this.AddCreateSelectLists(dbContext);
 
