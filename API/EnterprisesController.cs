@@ -7,18 +7,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.APIModels;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace CarPark.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EnterprisesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        readonly UserManager<ApplicationUser> _userManager;
 
-        public EnterprisesController(ApplicationDbContext context)
+        public EnterprisesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/Enterprises
@@ -28,13 +34,14 @@ namespace CarPark.API
             if (_context.Enterprises == null)
                 return NotFound();
 
-            var enterprises = await _context.Enterprises
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            return await userEnterprises
                 .Include(e => e.Drivers)
                     .ThenInclude(d => d.ActiveVehicle)
                 .Include(e => e.Vehicles)
+                .Select(e => new EnterpriseAPIModel(e))
                 .ToListAsync();
-
-            return enterprises.Select(e => new EnterpriseAPIModel(e)).ToList();
         }
 
         // GET: api/Enterprises/5
@@ -44,7 +51,9 @@ namespace CarPark.API
             if (_context.Enterprises == null)
                 return NotFound();
 
-            var enterprise = await _context.Enterprises
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            var enterprise = await userEnterprises
                 .Include(e => e.Drivers)
                     .ThenInclude(d => d.ActiveVehicle)
                 .Include(e => e.Vehicles)
@@ -59,6 +68,7 @@ namespace CarPark.API
         // PUT: api/Enterprises/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> PutEnterprise(int id, Enterprise enterprise)
         {
             if (id != enterprise.Id)
@@ -84,6 +94,7 @@ namespace CarPark.API
         // POST: api/Enterprises
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<ActionResult<Enterprise>> PostEnterprise(Enterprise enterprise)
         {
             if (_context.Enterprises == null)
@@ -97,6 +108,7 @@ namespace CarPark.API
 
         // DELETE: api/Enterprises/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteEnterprise(int id)
         {
             if (_context.Enterprises == null)

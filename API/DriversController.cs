@@ -7,18 +7,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.APIModels;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace CarPark.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DriversController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        readonly UserManager<ApplicationUser> _userManager;
 
-        public DriversController(ApplicationDbContext context)
+        public DriversController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/Drivers
@@ -28,14 +34,13 @@ namespace CarPark.API
             if (_context.Drivers == null)
                 return NotFound();
 
-            var drivers = await _context.Drivers
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+
+            return await userDrivers
                   .Include(d => d.ActiveVehicle)
                   .Include(d => d.DriversVehicles)
+                  .Select(d => new DriverAPIModel(d))
                   .ToListAsync();
-
-            return drivers
-                .Select(d => new DriverAPIModel(d))
-                .ToList();
         }
 
         // GET: api/Drivers/5
@@ -45,7 +50,9 @@ namespace CarPark.API
             if (_context.Drivers == null)
                 return NotFound();
 
-            var driver = await _context.Drivers
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+
+            var driver = await userDrivers
                 .Include(d => d.ActiveVehicle)
                 .Include(d => d.DriversVehicles)
                 .FirstOrDefaultAsync(d => d.Id == id);
@@ -59,6 +66,7 @@ namespace CarPark.API
         // PUT: api/Drivers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
             if (id != driver.Id)
@@ -84,6 +92,7 @@ namespace CarPark.API
         // POST: api/Drivers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
             if (_context.Drivers == null)
@@ -97,6 +106,7 @@ namespace CarPark.API
 
         // DELETE: api/Drivers/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteDriver(int id)
         {
             if (_context.Drivers == null)

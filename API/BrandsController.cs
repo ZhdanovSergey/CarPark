@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace CarPark.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = RoleNames.Admin)]
     public class BrandsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

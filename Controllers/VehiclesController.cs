@@ -22,23 +22,6 @@ namespace CarPark.Controllers
             _context = context;
             _userManager = userManager;
         }
-        async Task<IQueryable<Vehicle>> GetUserVehicles()
-        {
-            if (User.IsInRole(RoleNames.Admin))
-                return _context.Vehicles;
-
-            if (User.IsInRole(RoleNames.Manager))
-            {
-                var managerId = (await _userManager.FindByNameAsync(User.Identity.Name))?.Id;
-
-                return _context.Vehicles
-                        .Include(v => v.Enterprise)
-                            .ThenInclude(e => e.EnterprisesManagers)
-                        .Where(v => v.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == managerId));
-            }
-
-            throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
-        }
 
         // GET: Lists
         public async Task<IActionResult> Index()
@@ -46,7 +29,7 @@ namespace CarPark.Controllers
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
 
-            var userVehicles = await GetUserVehicles();
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
 
             return View(await userVehicles
                     .Include(m => m.ActiveDriver)
@@ -61,7 +44,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var userVehicles = await GetUserVehicles();
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
 
             var vehicle = await userVehicles
                 .Include(m => m.ActiveDriver)

@@ -24,30 +24,13 @@ namespace CarPark.Controllers
             _userManager = userManager;
         }
 
-        async Task<IQueryable<Enterprise>> GetUserEnterprises()
-        {
-            if (User.IsInRole(RoleNames.Admin))
-                return _context.Enterprises;
-
-            if (User.IsInRole(RoleNames.Manager))
-            {
-                var managerId = (await _userManager.FindByNameAsync(User.Identity.Name))?.Id;
-
-                return _context.Enterprises
-                        .Include(e => e.EnterprisesManagers)
-                        .Where(e => e.EnterprisesManagers.Any(em => em.ManagerId == managerId));
-            }
-
-            throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
-        }
-
         // GET: Enterprises
         public async Task<IActionResult> Index()
         {
             if (_context.Enterprises == null)
                 return Problem("Entity set 'AppDbContext.Enterprise'  is null.");
 
-            var userEnterprises = await GetUserEnterprises();
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
 
             return View(await userEnterprises
                 .Include(e => e.Drivers)
@@ -61,7 +44,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var userEnterprises = await GetUserEnterprises();
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
 
             var enterprise = await userEnterprises
                 .Include(e => e.Drivers)

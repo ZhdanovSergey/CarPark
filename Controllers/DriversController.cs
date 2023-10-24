@@ -23,28 +23,10 @@ namespace CarPark.Controllers
             _userManager = userManager;
         }
 
-        async Task<IQueryable<Driver>> GetUserDrivers()
-        {
-            if (User.IsInRole(RoleNames.Admin))
-                return _context.Drivers;
-
-            if (User.IsInRole(RoleNames.Manager))
-            {
-                var managerId = (await _userManager.FindByNameAsync(User.Identity.Name))?.Id;
-
-                return _context.Drivers
-                        .Include(d => d.Enterprise)
-                            .ThenInclude(e => e.EnterprisesManagers)
-                        .Where(d => d.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == managerId));
-            }
-
-            throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
-        }
-
         // GET: Drivers
         public async Task<IActionResult> Index()
         {
-            var userDrivers = await GetUserDrivers();
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
 
             var drivers = await userDrivers
                 .Include(d => d.ActiveVehicle)
@@ -60,7 +42,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var userDrivers = await GetUserDrivers();
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
 
             var driver = await userDrivers
                 .Include(d => d.ActiveVehicle)

@@ -7,18 +7,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.APIModels;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace CarPark.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class VehiclesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        readonly UserManager<ApplicationUser> _userManager;
 
-        public VehiclesController(ApplicationDbContext context)
+        public VehiclesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/Vehicles
@@ -28,23 +34,24 @@ namespace CarPark.API
             if (_context.Vehicles == null)
                 return NotFound();
 
-            var vehicles = await _context.Vehicles
-                .Include(v => v.DriversVehicles)
-                .ToListAsync();
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
 
-            return vehicles
+            return await userVehicles
+                .Include(v => v.DriversVehicles)
                 .Select(v => new VehicleAPIModel(v))
-                .ToList();
+                .ToListAsync();
         }
 
         // GET: api/Vehicles/5
         [HttpGet("{id}")]
         public async Task<ActionResult<VehicleAPIModel>> GetVehicle(int id)
         {
-          if (_context.Vehicles == null)
+            if (_context.Vehicles == null)
                 return NotFound();
 
-            var vehicle = await _context.Vehicles
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
+
+            var vehicle = await userVehicles
                 .Include(v => v.DriversVehicles)
                 .FirstOrDefaultAsync(v => v.Id == id);
 
@@ -57,6 +64,7 @@ namespace CarPark.API
         // PUT: api/Vehicles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
             if (id != vehicle.Id)
@@ -82,6 +90,7 @@ namespace CarPark.API
         // POST: api/Vehicles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
             if (_context.Vehicles == null)
@@ -95,6 +104,7 @@ namespace CarPark.API
 
         // DELETE: api/Vehicles/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteVehicle(int id)
         {
             if (_context.Vehicles == null)
