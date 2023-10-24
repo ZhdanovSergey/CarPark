@@ -6,27 +6,53 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace CarPark.Controllers
 {
+    [Authorize]
     public class EnterprisesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        readonly ApplicationDbContext _context;
+        readonly UserManager<ApplicationUser> _userManager;
 
-        public EnterprisesController(ApplicationDbContext context)
+        public EnterprisesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
+        }
+
+        async Task<IQueryable<Enterprise>> GetUserEnterprises()
+        {
+            if (User.IsInRole(RoleNames.Admin))
+                return _context.Enterprises;
+
+            if (User.IsInRole(RoleNames.Manager))
+            {
+                var managerId = (await _userManager.FindByNameAsync(User.Identity.Name))?.Id;
+
+                return _context.Enterprises
+                        .Include(e => e.EnterprisesManagers)
+                        .Where(e => e.EnterprisesManagers.Any(em => em.ManagerId == managerId));
+            }
+
+            throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
         }
 
         // GET: Enterprises
         public async Task<IActionResult> Index()
         {
-            return _context.Enterprises != null ?
-                View(await _context.Enterprises
-                    .Include(e => e.Drivers)
-                    .Include(e => e.Vehicles)
-                    .ToListAsync()) :
-                Problem("Entity set 'AppDbContext.Enterprise'  is null.");
+            if (_context.Enterprises == null)
+                return Problem("Entity set 'AppDbContext.Enterprise'  is null.");
+
+            var userEnterprises = await GetUserEnterprises();
+
+            return View(await userEnterprises
+                .Include(e => e.Drivers)
+                .Include(e => e.Vehicles)
+                .ToListAsync());
         }
 
         // GET: Enterprises/Details/5
@@ -35,7 +61,9 @@ namespace CarPark.Controllers
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var enterprise = await _context.Enterprises
+            var userEnterprises = await GetUserEnterprises();
+
+            var enterprise = await userEnterprises
                 .Include(e => e.Drivers)
                 .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -47,6 +75,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Enterprises/Create
+        [Authorize(Roles = RoleNames.Admin)]
         public IActionResult Create()
         {
             return View();
@@ -57,6 +86,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create([Bind("Id,Name,City")] Enterprise enterprise)
         {
             if (ModelState.IsValid)
@@ -70,6 +100,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Enterprises/Edit/5
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Enterprises == null)
@@ -88,6 +119,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Enterprise enterprise)
         {
             if (id != enterprise.Id)
@@ -115,6 +147,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Enterprises/Delete/5
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Enterprises == null)
@@ -134,6 +167,7 @@ namespace CarPark.Controllers
         // POST: Enterprises/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Enterprises == null)

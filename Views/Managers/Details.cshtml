@@ -1,0 +1,27 @@
+﻿@model CarPark.Models.Manager
+
+<div>
+    <h4>Manager</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UserName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            Enterprises
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var enterpriseName in Model.EnterprisesManagers.Select(em => em.Enterprise.Name))
+            {
+                <span>@enterpriseName;</span>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -19,19 +19,31 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="brands" asp-action="index">Brands</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="drivers" asp-action="index">Drivers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="enterprises" asp-action="index">Enterprises</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="vehicles" asp-action="index">Vehicles</a>
-                        </li>
-                    </ul>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @if (User.IsInRole(RoleNames.Admin))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="managers" asp-action="index">Managers</a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="enterprises" asp-action="index">Enterprises</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="drivers" asp-action="index">Drivers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="vehicles" asp-action="index">Vehicles</a>
+                            </li>
+                            @if (User.IsInRole(RoleNames.Admin))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="brands" asp-action="index">Brands</a>
+                                </li>                                
+                            }
+                        }
+                        </ul>
                     @await Html.PartialAsync("_LoginPartial")
                 </div>
             </div>

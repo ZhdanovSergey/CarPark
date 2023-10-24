@@ -6,22 +6,47 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace CarPark.Controllers
 {
+    [Authorize]
     public class DriversController : Controller
     {
         private readonly ApplicationDbContext _context;
+        readonly UserManager<ApplicationUser> _userManager;
 
-        public DriversController(ApplicationDbContext context)
+        public DriversController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
+        }
+
+        async Task<IQueryable<Driver>> GetUserDrivers()
+        {
+            if (User.IsInRole(RoleNames.Admin))
+                return _context.Drivers;
+
+            if (User.IsInRole(RoleNames.Manager))
+            {
+                var managerId = (await _userManager.FindByNameAsync(User.Identity.Name))?.Id;
+
+                return _context.Drivers
+                        .Include(d => d.Enterprise)
+                            .ThenInclude(e => e.EnterprisesManagers)
+                        .Where(d => d.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == managerId));
+            }
+
+            throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
         }
 
         // GET: Drivers
         public async Task<IActionResult> Index()
         {
-            var drivers = await _context.Drivers
+            var userDrivers = await GetUserDrivers();
+
+            var drivers = await userDrivers
                 .Include(d => d.ActiveVehicle)
                 .Include(d => d.Enterprise)
                 .ToListAsync();
@@ -35,7 +60,9 @@ namespace CarPark.Controllers
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var driver = await _context.Drivers
+            var userDrivers = await GetUserDrivers();
+
+            var driver = await userDrivers
                 .Include(d => d.ActiveVehicle)
                 .Include(d => d.DriversVehicles)
                     .ThenInclude(dv => dv.Vehicle)
@@ -49,6 +76,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers/Create
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create()
         {
             var driverVM = new DriverViewModel();
@@ -62,6 +90,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create([Bind("Id,Name,Salary,EnterpriseId")] DriverViewModel driverVM)
         {
             if (ModelState.IsValid)
@@ -78,6 +107,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers/Edit/5
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Drivers == null)
@@ -111,6 +141,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,VehiclesIds,ActiveVehicleId")] DriverViewModel driverVM)
         {
             if (id != driverVM.Id)
@@ -179,6 +210,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers/Delete/5
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Drivers == null)
@@ -200,6 +232,7 @@ namespace CarPark.Controllers
         // POST: Drivers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Drivers == null)

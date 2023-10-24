@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CarPark.Controllers
 {
+    [Authorize(Roles = RoleNames.Admin)]
     public class BrandsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -6,28 +6,53 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace CarPark.Controllers
 {
+    [Authorize]
     public class VehiclesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        readonly UserManager<ApplicationUser> _userManager;
 
-        public VehiclesController(ApplicationDbContext context)
+        public VehiclesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
+        }
+        async Task<IQueryable<Vehicle>> GetUserVehicles()
+        {
+            if (User.IsInRole(RoleNames.Admin))
+                return _context.Vehicles;
+
+            if (User.IsInRole(RoleNames.Manager))
+            {
+                var managerId = (await _userManager.FindByNameAsync(User.Identity.Name))?.Id;
+
+                return _context.Vehicles
+                        .Include(v => v.Enterprise)
+                            .ThenInclude(e => e.EnterprisesManagers)
+                        .Where(v => v.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == managerId));
+            }
+
+            throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
         }
 
         // GET: Lists
         public async Task<IActionResult> Index()
         {
-            return _context.Vehicles != null ? 
-                View(await _context.Vehicles
+            if (_context.Vehicles == null)
+                return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+
+            var userVehicles = await GetUserVehicles();
+
+            return View(await userVehicles
                     .Include(m => m.ActiveDriver)
                     .Include(m => m.Brand)
                     .Include(m => m.Enterprise)
-                    .ToListAsync()) :
-                Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+                    .ToListAsync());
         }
 
         // GET: Lists/Details/5
@@ -36,7 +61,9 @@ namespace CarPark.Controllers
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var vehicle = await _context.Vehicles
+            var userVehicles = await GetUserVehicles();
+
+            var vehicle = await userVehicles
                 .Include(m => m.ActiveDriver)
                 .Include(v => v.Brand)
                 .Include(v => v.Enterprise)
@@ -51,6 +78,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists/Create
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create()
         {
             var vehicleVM = new VehicleViewModel();
@@ -64,6 +92,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create([Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage")] VehicleViewModel vehicleVM)
         {
             if (ModelState.IsValid)
@@ -81,6 +110,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists/Edit/5
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Vehicles == null)
@@ -89,7 +119,7 @@ namespace CarPark.Controllers
             var vehicle = await _context.Vehicles
                 .Include(d => d.DriversVehicles)
                     .ThenInclude(dv => dv.Driver)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
                 return NotFound();
@@ -105,6 +135,7 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,DriversIds,ActiveDriverId")] VehicleViewModel vehicleVM)
         {
             if (id != vehicleVM.Id)
@@ -155,6 +186,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists/Delete/5
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Vehicles == null)
@@ -177,6 +209,7 @@ namespace CarPark.Controllers
         // POST: Lists/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Vehicles == null)
