@@ -151,6 +151,8 @@ namespace CarPark.Controllers
 
                     if (newDriversVehicles.Any(dv => dv.VehicleId == driverVM.ActiveVehicleId))
                     {
+                        await Vehicle.RemoveActiveDriver(_context, driverVM.Id);
+
                         var activeVehicle = await _context.Vehicles
                             .FirstOrDefaultAsync(v => v.Id == driverVM.ActiveVehicleId);
 
@@ -159,17 +161,6 @@ namespace CarPark.Controllers
                             activeVehicle.ActiveDriverId = driverVM.Id;
                             _context.Update(activeVehicle);
                         }
-                    } else
-                    {
-                        var prevActiveVehicle = await _context.Vehicles
-                            .FirstOrDefaultAsync(v => v.ActiveDriverId == driverVM.Id);
-
-                        if (prevActiveVehicle != null)
-                        {
-                            prevActiveVehicle.ActiveDriverId = null;
-                            _context.Update(prevActiveVehicle);
-                        }
-
                     }
 
                     _context.Update(new Driver(driverVM));

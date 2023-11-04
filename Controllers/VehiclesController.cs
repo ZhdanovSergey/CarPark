@@ -144,10 +144,10 @@ namespace CarPark.Controllers
 
                     DriverVehicle.Update(_context, oldDriversVehicles, newDriversVehicles, DriverVehicleIdProp.DriverId);
 
-                    vehicleVM.ActiveDriverId = newDriversVehicles
-                        .Any(dv => dv.DriverId == vehicleVM.ActiveDriverId)
-                        ? vehicleVM.ActiveDriverId
-                        : null;
+                    if (newDriversVehicles.Any(dv => dv.DriverId == vehicleVM.ActiveDriverId))
+                        await Vehicle.RemoveActiveDriver(_context, vehicleVM.ActiveDriverId);
+                    else
+                        vehicleVM.ActiveDriverId = null;
 
                     _context.Update(new Vehicle(vehicleVM));
                     await _context.SaveChangesAsync();

@@ -33,9 +33,12 @@ namespace CarPark.Models
             Price = vehicleVM.Price;
             Year = vehicleVM.Year;
         }
-        public static async Task<IQueryable<Vehicle>> GetUserVehicles(ApplicationDbContext dbContext,
+        public static async Task<IQueryable<Vehicle>> GetUserVehicles
+        (
+            ApplicationDbContext dbContext,
             UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal)
+            ClaimsPrincipal claimsPrincipal
+        )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
                 return dbContext.Vehicles;
@@ -51,6 +54,17 @@ namespace CarPark.Models
             }
 
             throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
+        }
+        public static async Task RemoveActiveDriver(ApplicationDbContext dbContext, int? activeDriverId)
+        {
+            var prevActiveVehicle = await dbContext.Vehicles
+                .FirstOrDefaultAsync(v => v.ActiveDriverId == activeDriverId);
+
+            if (prevActiveVehicle is not null)
+            {
+                prevActiveVehicle.ActiveDriverId = null;
+                dbContext.Update(prevActiveVehicle);
+            }
         }
     }
 }
