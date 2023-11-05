@@ -42,7 +42,7 @@ namespace CarPark.Controllers
         // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;

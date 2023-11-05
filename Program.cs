@@ -1,5 +1,7 @@
 using CarPark.Extentions;
+using CarPark.Middleware;
 using CarPark.Models;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -37,6 +39,11 @@ namespace CarPark
             })
             .AddIdentityCookies(o => { });
 
+            builder.Services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-CSRF-TOKEN";
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -49,6 +56,7 @@ namespace CarPark
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<AntiForgeryTokenMiddleware>();
             app.UseSeedData();
 
             app.MapControllerRoute(
