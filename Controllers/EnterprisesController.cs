@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using NuGet.Versioning;
 
 namespace CarPark.Controllers
 {
@@ -58,7 +59,6 @@ namespace CarPark.Controllers
         }
 
         // GET: Enterprises/Create
-        [Authorize(Roles = RoleNames.Admin)]
         public IActionResult Create()
         {
             return View();
@@ -69,13 +69,11 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
-        public async Task<IActionResult> Create([Bind("Id,Name,City")] Enterprise enterprise)
+        public async Task<IActionResult> Create([Bind("Name,City")] Enterprise enterprise)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(enterprise);
-                await _context.SaveChangesAsync();
+                await Enterprise.SaveAndBindWithManager(_context, _userManager, User, enterprise);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -83,13 +81,16 @@ namespace CarPark.Controllers
         }
 
         // GET: Enterprises/Edit/5
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var enterprise = await _context.Enterprises.FindAsync(id);
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            var enterprise = await userEnterprises
+                .Where(ue => ue.Id == id)
+                .FirstOrDefaultAsync();
 
             if (enterprise == null)
                 return NotFound();
@@ -102,10 +103,11 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Enterprise enterprise)
         {
-            if (id != enterprise.Id)
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            if (id != enterprise.Id || await userEnterprises.AllAsync(ue => ue.Id != enterprise.Id))
                 return NotFound();
 
             if (ModelState.IsValid)
@@ -117,7 +119,7 @@ namespace CarPark.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EnterpriseExists(enterprise.Id))
+                    if (!(await EnterpriseExists(enterprise.Id)))
                         return NotFound();
                     else
                         throw;
@@ -130,13 +132,15 @@ namespace CarPark.Controllers
         }
 
         // GET: Enterprises/Delete/5
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var enterprise = await _context.Enterprises
+
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            var enterprise = await userEnterprises
                 .Include(e => e.Drivers)
                 .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -150,13 +154,16 @@ namespace CarPark.Controllers
         // POST: Enterprises/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Enterprises == null)
                 return Problem("Entity set 'AppDbContext.Enterprise'  is null.");
 
-            var enterprise = await _context.Enterprises.FindAsync(id);
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            var enterprise = await userEnterprises
+                .Where(ue => ue.Id == id)
+                .FirstOrDefaultAsync();
 
             if (enterprise != null)
                 _context.Enterprises.Remove(enterprise);
@@ -166,9 +173,10 @@ namespace CarPark.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EnterpriseExists(int id)
+        private async Task<bool> EnterpriseExists(int id)
         {
-          return (_context.Enterprises?.Any(e => e.Id == id)).GetValueOrDefault();
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+            return (userEnterprises?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

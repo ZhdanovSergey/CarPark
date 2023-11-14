@@ -13,7 +13,7 @@ namespace CarPark.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = RoleNames.Admin)]
+    [Authorize]
     public class BrandsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

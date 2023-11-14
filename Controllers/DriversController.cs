@@ -58,12 +58,10 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers/Create
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create()
         {
             var driverVM = new DriverViewModel();
-            await driverVM.AddCreateSelectLists(_context);
-
+            await driverVM.AddCreateSelectLists(_context, _userManager, User);
             return View(driverVM);
         }
 
@@ -72,30 +70,28 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
-        public async Task<IActionResult> Create([Bind("Id,Name,Salary,EnterpriseId")] DriverViewModel driverVM)
+        public async Task<IActionResult> Create([Bind("Name,Salary,EnterpriseId")] DriverViewModel driverVM)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(new Driver(driverVM));
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
 
-            await driverVM.AddCreateSelectLists(_context);
-
+            await driverVM.AddCreateSelectLists(_context, _userManager, User);
             return View(driverVM);
         }
 
         // GET: Drivers/Edit/5
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var driver = await _context.Drivers
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+
+            var driver = await userDrivers
                 .Include(d => d.DriversVehicles)
                 .Include(d => d.ActiveVehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -103,17 +99,8 @@ namespace CarPark.Controllers
             if (driver == null)
                 return NotFound();
 
-            var vehiclesIds = await _context.DriversVehicles
-                .Where(dv => dv.DriverId == driver.Id)
-                .Select(dv => dv.VehicleId)
-                .ToListAsync();
-
-            var activeVehicleId = (await _context.Drivers
-                .Include(d => d.ActiveVehicle)
-                .FirstOrDefaultAsync(d => d.Id == driver.Id))?.ActiveVehicle?.Id;
-
             var driverVM = new DriverViewModel(driver);
-            await driverVM.AddEditSelectLists(_context);
+            await driverVM.AddEditSelectLists(_context, _userManager, User);
 
             return View(driverVM);
         }
@@ -123,11 +110,20 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,VehiclesIds,ActiveVehicleId")] DriverViewModel driverVM)
         {
-            if (id != driverVM.Id)
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            if
+            (
+                id != driverVM.Id
+                || await userDrivers.AllAsync(ud => ud.Id != driverVM.Id)
+                || await userEnterprises.AllAsync(ue => ue.Id != driverVM.EnterpriseId)
+            )
+            {
                 return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
@@ -138,7 +134,8 @@ namespace CarPark.Controllers
                         .ToListAsync();
 
                     var newDriversVehicles = await _context.Vehicles
-                        .Where(vehicle => vehicle.EnterpriseId == driverVM.EnterpriseId
+                        .Where(vehicle =>
+                            vehicle.EnterpriseId == driverVM.EnterpriseId
                             && driverVM.VehiclesIds.Any(vid => vid == vehicle.Id))
                         .Select(vehicle => new DriverVehicle
                         {
@@ -156,11 +153,8 @@ namespace CarPark.Controllers
                         var activeVehicle = await _context.Vehicles
                             .FirstOrDefaultAsync(v => v.Id == driverVM.ActiveVehicleId);
 
-                        if (activeVehicle is not null)
-                        {
-                            activeVehicle.ActiveDriverId = driverVM.Id;
-                            _context.Update(activeVehicle);
-                        }
+                        activeVehicle.ActiveDriverId = driverVM.Id;
+                        _context.Update(activeVehicle);
                     }
 
                     _context.Update(new Driver(driverVM));
@@ -168,7 +162,7 @@ namespace CarPark.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DriverExists(driverVM.Id))
+                    if (!(await DriverExists(driverVM.Id)))
                         return NotFound();
                     else
                         throw;
@@ -177,19 +171,20 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await driverVM.AddEditSelectLists(_context);
+            await driverVM.AddEditSelectLists(_context, _userManager, User);
 
             return View(driverVM);
         }
 
         // GET: Drivers/Delete/5
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var driver = await _context.Drivers
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+
+            var driver = await userDrivers
                 .Include(v => v.ActiveVehicle)
                 .Include(d => d.Enterprise)
                 .Include(d => d.DriversVehicles)
@@ -205,13 +200,14 @@ namespace CarPark.Controllers
         // POST: Drivers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Drivers == null)
                 return Problem("Entity set 'AppDbContext.Driver'  is null.");
 
-            var driver = await _context.Drivers.FindAsync(id);
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+
+            var driver = await userDrivers.FirstOrDefaultAsync(ud => ud.Id == id);
 
             if (driver != null)
                 _context.Drivers.Remove(driver);
@@ -221,9 +217,11 @@ namespace CarPark.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DriverExists(int id)
+        private async Task<bool> DriverExists(int id)
         {
-          return (_context.Drivers?.Any(e => e.Id == id)).GetValueOrDefault();
+
+            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            return (userDrivers?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -66,7 +66,6 @@ namespace CarPark.API
         // PUT: api/Drivers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
             if (id != driver.Id)
@@ -92,7 +91,6 @@ namespace CarPark.API
         // POST: api/Drivers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
             if (_context.Drivers == null)
@@ -101,12 +99,11 @@ namespace CarPark.API
             _context.Drivers.Add(driver);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDriver", new { id = driver.Id }, driver);
+            return CreatedAtAction("GetDriver", new { id = driver.Id }, new DriverAPIModel(driver));
         }
 
         // DELETE: api/Drivers/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteDriver(int id)
         {
             if (_context.Drivers == null)

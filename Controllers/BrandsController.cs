@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CarPark.Controllers
 {
-    [Authorize(Roles = RoleNames.Admin)]
+    [Authorize]
     public class BrandsController : Controller
     {
         private readonly ApplicationDbContext _context;

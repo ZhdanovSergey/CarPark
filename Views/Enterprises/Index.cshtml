@@ -2,12 +2,9 @@
 
 <h4>Enterprises</h4>
 <hr />
-@if (User.IsInRole(RoleNames.Admin))
-{
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>    
-}
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
 <table class="table">
     <thead>
         <tr>
@@ -49,15 +46,9 @@
                     }
                 </td>
                 <td>
-                    @if (User.IsInRole(RoleNames.Admin))
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                    }
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                    @if (User.IsInRole(RoleNames.Admin))
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>                        
-                    }
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
             </tr>
         }

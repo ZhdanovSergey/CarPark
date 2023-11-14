@@ -22,9 +22,12 @@ namespace CarPark.Models
             Salary = driverVM.Salary;
             EnterpriseId = driverVM.EnterpriseId;
         }
-        public static async Task<IQueryable<Driver>> GetUserDrivers(ApplicationDbContext dbContext,
+        public static async Task<IQueryable<Driver>> GetUserDrivers
+        (
+            ApplicationDbContext dbContext,
             UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal)
+            ClaimsPrincipal claimsPrincipal
+        )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
                 return dbContext.Drivers;

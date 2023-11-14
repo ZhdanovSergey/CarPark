@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
 
 namespace CarPark
 {
@@ -24,6 +25,12 @@ namespace CarPark
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
 
             builder.Services
                 .AddIdentityCore<ApplicationUser>()

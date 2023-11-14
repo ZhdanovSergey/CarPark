@@ -61,12 +61,10 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists/Create
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create()
         {
             var vehicleVM = new VehicleViewModel();
-            await vehicleVM.AddCreateSelectLists(_context);
-
+            await vehicleVM.AddCreateSelectLists(_context, _userManager, User);
             return View(vehicleVM);
         }
 
@@ -75,7 +73,6 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Create([Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage")] VehicleViewModel vehicleVM)
         {
             if (ModelState.IsValid)
@@ -83,23 +80,22 @@ namespace CarPark.Controllers
                 var vehicle = new Vehicle(vehicleVM);
                 _context.Add(vehicle);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
 
-            await vehicleVM.AddCreateSelectLists(_context);
-
+            await vehicleVM.AddCreateSelectLists(_context, _userManager, User);
             return View(vehicleVM);
         }
 
         // GET: Lists/Edit/5
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var vehicle = await _context.Vehicles
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
+
+            var vehicle = await userVehicles
                 .Include(d => d.DriversVehicles)
                     .ThenInclude(dv => dv.Driver)
                 .FirstOrDefaultAsync(v => v.Id == id);
@@ -108,7 +104,7 @@ namespace CarPark.Controllers
                 return NotFound();
 
             var vehicleVM = new VehicleViewModel(vehicle);
-            await vehicleVM.AddEditSelectLists(_context);
+            await vehicleVM.AddEditSelectLists(_context, _userManager, User);
 
             return View(vehicleVM);
         }
@@ -118,11 +114,20 @@ namespace CarPark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,DriversIds,ActiveDriverId")] VehicleViewModel vehicleVM)
         {
-            if (id != vehicleVM.Id)
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+
+            if
+            (
+                id != vehicleVM.Id
+                || await userVehicles.AllAsync(ud => ud.Id != vehicleVM.Id)
+                || await userEnterprises.AllAsync(ue => ue.Id != vehicleVM.EnterpriseId)
+            )
+            {
                 return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
@@ -133,7 +138,8 @@ namespace CarPark.Controllers
                         .ToListAsync();
 
                     var newDriversVehicles = await _context.Drivers
-                        .Where(driver => driver.EnterpriseId == vehicleVM.EnterpriseId
+                        .Where(driver => 
+                            driver.EnterpriseId == vehicleVM.EnterpriseId
                             && vehicleVM.DriversIds.Any(did => did == driver.Id))
                         .Select(driver => new DriverVehicle
                         {
@@ -154,7 +160,7 @@ namespace CarPark.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VehicleExists(vehicleVM.Id))
+                    if (!(await VehicleExists(vehicleVM.Id)))
                         return NotFound();
                     else
                         throw;
@@ -163,19 +169,19 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await vehicleVM.AddEditSelectLists(_context);
-
+            await vehicleVM.AddEditSelectLists(_context, _userManager, User);
             return View(vehicleVM);
         }
 
         // GET: Lists/Delete/5
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var vehicle = await _context.Vehicles
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
+
+            var vehicle = await userVehicles
                 .Include(v => v.ActiveDriver)
                 .Include(v => v.Brand)
                 .Include(v => v.Enterprise)
@@ -192,25 +198,25 @@ namespace CarPark.Controllers
         // POST: Lists/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
 
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
+            var vehicle = await userVehicles.FirstOrDefaultAsync(uv => uv.Id == id);
 
             if (vehicle != null)
                 _context.Vehicles.Remove(vehicle);
 
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VehicleExists(int id)
+        private async Task<bool> VehicleExists(int id)
         {
-          return (_context.Vehicles?.Any(e => e.Id == id)).GetValueOrDefault();
+            var userVehicles = await Vehicle.GetUserVehicles(_context, _userManager, User);
+            return (userVehicles?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

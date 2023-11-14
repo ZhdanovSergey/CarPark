@@ -1,6 +1,8 @@
 ﻿using CarPark.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CarPark.ViewModels
 {
@@ -25,13 +27,24 @@ namespace CarPark.ViewModels
             VehiclesIds = driver.DriversVehicles.Select(dv => dv.VehicleId).ToList();
             ActiveVehicleId = driver.ActiveVehicle?.Id;
         }
-        public async Task AddCreateSelectLists(ApplicationDbContext dbContext)
+        public async Task AddCreateSelectLists
+        (
+            ApplicationDbContext dbContext,
+            UserManager<ApplicationUser> userManager,
+            ClaimsPrincipal claimsPrincipal
+        )
         {
-            this.EnterprisesSelectList = new SelectList(await dbContext.Enterprises.ToListAsync(), "Id", "Name");
+            var userEnterprises = await Enterprise.GetUserEnterprises(dbContext, userManager, claimsPrincipal);
+            this.EnterprisesSelectList = new SelectList(await userEnterprises.ToListAsync(), "Id", "Name");
         }
-        public async Task AddEditSelectLists(ApplicationDbContext dbContext)
+        public async Task AddEditSelectLists
+        (
+            ApplicationDbContext dbContext,
+            UserManager<ApplicationUser> userManager,
+            ClaimsPrincipal claimsPrincipal
+        )
         {
-            await this.AddCreateSelectLists(dbContext);
+            var userEnterprises = await Enterprise.GetUserEnterprises(dbContext, userManager, claimsPrincipal);
 
             var vehiclesWithSameEnterprise = await dbContext.Vehicles
                 .Where(v => v.EnterpriseId == this.EnterpriseId)
@@ -43,6 +56,7 @@ namespace CarPark.ViewModels
                 .Select(dv => dv.Vehicle)
                 .ToListAsync();
 
+            this.EnterprisesSelectList = new SelectList(await userEnterprises.ToListAsync(), "Id", "Name");
             this.VehiclesSelectList = new MultiSelectList(vehiclesWithSameEnterprise, "Id", "RegistrationNumber");
             this.ActiveVehicleSelectList = new SelectList(vehiclesAttachedToDriver, "Id", "RegistrationNumber");
         }
