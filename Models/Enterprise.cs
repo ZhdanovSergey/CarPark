@@ -15,11 +15,27 @@ namespace CarPark.Models
         public List<Vehicle> Vehicles { get; set; } = new();
         public List<DriverVehicle> DriversVehicles { get; set; } = new();
         public List<EnterpriseManager> EnterprisesManagers { get; set; } = new();
-        public static async Task<IQueryable<Enterprise>> GetUserEnterprises
+        public static async Task<bool> CheckAccess
+        (
+            int enterpriseId,
+            ApplicationDbContext dbContext,
+            ClaimsPrincipal claimsPrincipal,
+            int userId
+        )
+        {
+            if (!claimsPrincipal.IsInRole(RoleNames.Manager))
+                return true;
+
+            var enterpriseManager = await dbContext.EnterprisesManagers
+                .FirstOrDefaultAsync(em => em.EnterpriseId == enterpriseId && em.ManagerId == userId);
+
+            return enterpriseManager is not null;
+        }
+        public static IQueryable<Enterprise> GetUserEnterprises
         (
             ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal
+            ClaimsPrincipal claimsPrincipal,
+            int userId
         )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
@@ -27,38 +43,33 @@ namespace CarPark.Models
 
             if (claimsPrincipal.IsInRole(RoleNames.Manager))
             {
-                var managerId = (await userManager.FindByNameAsync(claimsPrincipal.Identity.Name))?.Id;
-
                 return dbContext.Enterprises
                     .Include(e => e.EnterprisesManagers)
-                    .Where(e => e.EnterprisesManagers.Any(em => em.ManagerId == managerId));
+                    .Where(e => e.EnterprisesManagers.Any(em => em.ManagerId == userId));
             }
 
             throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
         }
-        public static async Task SaveAndBindWithManager
+        public async Task SaveAndBindWithManager
         (
             ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
             ClaimsPrincipal claimsPrincipal,
-            Enterprise enterprise
+            int userId
         )
         {
-            dbContext.Add(enterprise);
+            dbContext.Add(this);
             await dbContext.SaveChangesAsync();
 
             if (claimsPrincipal.IsInRole(RoleNames.Manager))
             {
-                var manager = await userManager.FindByNameAsync(claimsPrincipal.Identity.Name);
-
                 var savedEnterprise = await dbContext.Enterprises
-                    .Where(e => e.Name == enterprise.Name && e.City == enterprise.City)
+                    .Where(e => e.Name == this.Name && e.City == this.City)
                     .FirstOrDefaultAsync();
 
                 dbContext.Add(new EnterpriseManager
                 {
                     EnterpriseId = savedEnterprise.Id,
-                    ManagerId = manager.Id,
+                    ManagerId = userId,
                 });
 
                 await dbContext.SaveChangesAsync();

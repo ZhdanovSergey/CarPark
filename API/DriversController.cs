@@ -19,12 +19,20 @@ namespace CarPark.API
     public class DriversController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        readonly UserManager<ApplicationUser> _userManager;
+        readonly int _userId;
 
-        public DriversController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public DriversController
+        (
+            ApplicationDbContext context,
+            IHttpContextAccessor contextAccessor,
+            UserManager<ApplicationUser> userManager
+        )
         {
             _context = context;
-            _userManager = userManager;
+
+            var user = contextAccessor.HttpContext?.User;
+            string? userId = user is not null ? userManager.GetUserId(user) : null;
+            _userId = Int32.Parse(userId ?? "");
         }
 
         // GET: api/Drivers
@@ -34,7 +42,7 @@ namespace CarPark.API
             if (_context.Drivers == null)
                 return NotFound();
 
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
 
             return await userDrivers
                   .Include(d => d.ActiveVehicle)
@@ -50,15 +58,16 @@ namespace CarPark.API
             if (_context.Drivers == null)
                 return NotFound();
 
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
-
-            var driver = await userDrivers
+            var driver = await _context.Drivers
                 .Include(d => d.ActiveVehicle)
                 .Include(d => d.DriversVehicles)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (driver == null)
                 return NotFound();
+
+            if (!(await Enterprise.CheckAccess(driver.EnterpriseId, _context, User, _userId)))
+                return StatusCode(StatusCodes.Status403Forbidden);
 
             return new DriverAPIModel(driver);
         }
@@ -70,6 +79,17 @@ namespace CarPark.API
         {
             if (id != driver.Id)
                 return BadRequest();
+
+            var prevDriver = await _context.Drivers.FindAsync(id);
+
+            if (prevDriver is null)
+                return NotFound();
+
+            var hasAccessToPrevDriver = await Enterprise.CheckAccess(prevDriver.EnterpriseId, _context, User, _userId);
+            var hasAccessToDriver = await Enterprise.CheckAccess(driver.EnterpriseId, _context, User, _userId);
+
+            if (!hasAccessToPrevDriver || !hasAccessToDriver)
+                return StatusCode(StatusCodes.Status403Forbidden);
 
             _context.Entry(driver).State = EntityState.Modified;
 
@@ -96,6 +116,9 @@ namespace CarPark.API
             if (_context.Drivers == null)
                 return Problem("Entity set 'AppDbContext.Drivers'  is null.");
 
+            if (!(await Enterprise.CheckAccess(driver.EnterpriseId, _context, User, _userId)))
+                return StatusCode(StatusCodes.Status403Forbidden);
+
             _context.Drivers.Add(driver);
             await _context.SaveChangesAsync();
 
@@ -114,12 +137,14 @@ namespace CarPark.API
             if (driver == null)
                 return NotFound();
 
+            if (!(await Enterprise.CheckAccess(driver.EnterpriseId, _context, User, _userId)))
+                return StatusCode(StatusCodes.Status403Forbidden);
+
             _context.Drivers.Remove(driver);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
         private bool DriverExists(int id)
         {
             return (_context.Drivers?.Any(e => e.Id == id)).GetValueOrDefault();

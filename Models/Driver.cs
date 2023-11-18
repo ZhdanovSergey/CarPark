@@ -22,11 +22,11 @@ namespace CarPark.Models
             Salary = driverVM.Salary;
             EnterpriseId = driverVM.EnterpriseId;
         }
-        public static async Task<IQueryable<Driver>> GetUserDrivers
+        public static IQueryable<Driver> GetUserDrivers
         (
             ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal
+            ClaimsPrincipal claimsPrincipal,
+            int userId
         )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
@@ -34,12 +34,10 @@ namespace CarPark.Models
 
             if (claimsPrincipal.IsInRole(RoleNames.Manager))
             {
-                var managerId = (await userManager.FindByNameAsync(claimsPrincipal.Identity.Name))?.Id;
-
                 return dbContext.Drivers
-                        .Include(d => d.Enterprise)
-                            .ThenInclude(e => e.EnterprisesManagers)
-                        .Where(d => d.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == managerId));
+                    .Include(d => d.Enterprise)
+                        .ThenInclude(e => e.EnterprisesManagers)
+                    .Where(d => d.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == userId));
             }
 
             throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");

@@ -15,18 +15,26 @@ namespace CarPark.Controllers
     public class DriversController : Controller
     {
         private readonly ApplicationDbContext _context;
-        readonly UserManager<ApplicationUser> _userManager;
+        readonly int _userId;
 
-        public DriversController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public DriversController
+        (
+            ApplicationDbContext context,
+            IHttpContextAccessor contextAccessor,
+            UserManager<ApplicationUser> userManager
+        )
         {
             _context = context;
-            _userManager = userManager;
+
+            var user = contextAccessor.HttpContext?.User;
+            string? userId = user is not null ? userManager.GetUserId(user) : null;
+            _userId = Int32.Parse(userId ?? "");
         }
 
         // GET: Drivers
         public async Task<IActionResult> Index()
         {
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
 
             var drivers = await userDrivers
                 .Include(d => d.ActiveVehicle)
@@ -42,7 +50,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
 
             var driver = await userDrivers
                 .Include(d => d.ActiveVehicle)
@@ -61,7 +69,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Create()
         {
             var driverVM = new DriverViewModel();
-            await driverVM.AddCreateSelectLists(_context, _userManager, User);
+            driverVM.AddSelectLists(_context, User, _userId);
             return View(driverVM);
         }
 
@@ -79,7 +87,7 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await driverVM.AddCreateSelectLists(_context, _userManager, User);
+            driverVM.AddSelectLists(_context, User, _userId);
             return View(driverVM);
         }
 
@@ -89,7 +97,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
 
             var driver = await userDrivers
                 .Include(d => d.DriversVehicles)
@@ -100,7 +108,7 @@ namespace CarPark.Controllers
                 return NotFound();
 
             var driverVM = new DriverViewModel(driver);
-            await driverVM.AddEditSelectLists(_context, _userManager, User);
+            driverVM.AddSelectLists(_context, User, _userId);
 
             return View(driverVM);
         }
@@ -112,8 +120,8 @@ namespace CarPark.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Salary,EnterpriseId,VehiclesIds,ActiveVehicleId")] DriverViewModel driverVM)
         {
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
-            var userEnterprises = await Enterprise.GetUserEnterprises(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
 
             if
             (
@@ -153,8 +161,11 @@ namespace CarPark.Controllers
                         var activeVehicle = await _context.Vehicles
                             .FirstOrDefaultAsync(v => v.Id == driverVM.ActiveVehicleId);
 
-                        activeVehicle.ActiveDriverId = driverVM.Id;
-                        _context.Update(activeVehicle);
+                        if (activeVehicle != null)
+                        {
+                            activeVehicle.ActiveDriverId = driverVM.Id;
+                            _context.Update(activeVehicle);
+                        }
                     }
 
                     _context.Update(new Driver(driverVM));
@@ -162,7 +173,7 @@ namespace CarPark.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!(await DriverExists(driverVM.Id)))
+                    if (!DriverExists(driverVM.Id))
                         return NotFound();
                     else
                         throw;
@@ -171,8 +182,7 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await driverVM.AddEditSelectLists(_context, _userManager, User);
-
+            driverVM.AddSelectLists(_context, User, _userId);
             return View(driverVM);
         }
 
@@ -182,7 +192,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Drivers == null)
                 return NotFound();
 
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
 
             var driver = await userDrivers
                 .Include(v => v.ActiveVehicle)
@@ -205,7 +215,7 @@ namespace CarPark.Controllers
             if (_context.Drivers == null)
                 return Problem("Entity set 'AppDbContext.Driver'  is null.");
 
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
 
             var driver = await userDrivers.FirstOrDefaultAsync(ud => ud.Id == id);
 
@@ -217,10 +227,9 @@ namespace CarPark.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<bool> DriverExists(int id)
+        private bool DriverExists(int id)
         {
-
-            var userDrivers = await Driver.GetUserDrivers(_context, _userManager, User);
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
             return (userDrivers?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }

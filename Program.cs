@@ -19,18 +19,13 @@ namespace CarPark
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb; Database=CarParkDB; Trusted_Connection=True"));
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            });
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb; Database=CarParkDB; Trusted_Connection=True"));
 
             builder.Services
                 .AddIdentityCore<ApplicationUser>()
@@ -49,6 +44,12 @@ namespace CarPark
             builder.Services.AddAntiforgery(options =>
             {
                 options.HeaderName = "X-CSRF-TOKEN";
+            });
+
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
 
             var app = builder.Build();

@@ -35,40 +35,27 @@ namespace CarPark.ViewModels
             Year = vehicle.Year;
             DriversIds = vehicle.DriversVehicles.Select(dv => dv.DriverId).ToList();
         }
-        public async Task AddCreateSelectLists
+        public void AddSelectLists
         (
             ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal
+            ClaimsPrincipal claimsPrincipal,
+            int userId
         )
         {
-            var userEnterprises = await Enterprise.GetUserEnterprises(dbContext, userManager, claimsPrincipal);
-            this.EnterprisesSelectList = new SelectList(await userEnterprises.ToListAsync(), "Id", "Name", this.EnterpriseId);
-            this.BrandsSelectList = new SelectList(await dbContext.Brands.ToListAsync(), "Id", "Name", this.BrandId);
-        }
-        public async Task AddEditSelectLists
-        (
-            ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal
-        )
-        {
-            var userEnterprises = await Enterprise.GetUserEnterprises(dbContext, userManager, claimsPrincipal);
+            var userEnterprises = Enterprise.GetUserEnterprises(dbContext, claimsPrincipal, userId);
 
-            var driversWithSameEnterprise = await dbContext.Drivers
-                .Where(v => v.EnterpriseId == this.EnterpriseId)
-                .ToListAsync();
+            var driversWithSameEnterprise = dbContext.Drivers
+                .Where(v => v.EnterpriseId == this.EnterpriseId);
 
-            var driversAttachedToVehicle = await dbContext.DriversVehicles
+            var driversAttachedToVehicle = dbContext.DriversVehicles
                 .Where(dv => dv.VehicleId == this.Id)
                 .Include(dv => dv.Driver)
-                .Select(dv => dv.Driver)
-                .ToListAsync();
+                .Select(dv => dv.Driver);
 
-            this.EnterprisesSelectList = new SelectList(await userEnterprises.ToListAsync(), "Id", "Name", this.EnterpriseId);
+            this.EnterprisesSelectList = new SelectList(userEnterprises, "Id", "Name", this.EnterpriseId);
             this.DriversSelectList = new MultiSelectList(driversWithSameEnterprise, "Id", "Name");
             this.ActiveDriverSelectList = new SelectList(driversAttachedToVehicle, "Id", "Name", this.ActiveDriverId);
-            this.BrandsSelectList = new SelectList(await dbContext.Brands.ToListAsync(), "Id", "Name", this.BrandId);
+            this.BrandsSelectList = new SelectList(dbContext.Brands, "Id", "Name", this.BrandId);
         }
     }
 }

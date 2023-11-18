@@ -33,11 +33,11 @@ namespace CarPark.Models
             Price = vehicleVM.Price;
             Year = vehicleVM.Year;
         }
-        public static async Task<IQueryable<Vehicle>> GetUserVehicles
+        public static IQueryable<Vehicle> GetUserVehicles
         (
             ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
-            ClaimsPrincipal claimsPrincipal
+            ClaimsPrincipal claimsPrincipal,
+            int userId
         )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
@@ -45,12 +45,10 @@ namespace CarPark.Models
 
             if (claimsPrincipal.IsInRole(RoleNames.Manager))
             {
-                var managerId = (await userManager.FindByNameAsync(claimsPrincipal.Identity.Name))?.Id;
-
                 return dbContext.Vehicles
-                        .Include(v => v.Enterprise)
-                            .ThenInclude(e => e.EnterprisesManagers)
-                        .Where(v => v.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == managerId));
+                    .Include(v => v.Enterprise)
+                        .ThenInclude(e => e.EnterprisesManagers)
+                    .Where(v => v.Enterprise.EnterprisesManagers.Any(em => em.ManagerId == userId));
             }
 
             throw new Exception($"User role should be {RoleNames.Admin} or {RoleNames.Manager}");
