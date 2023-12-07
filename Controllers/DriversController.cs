@@ -8,6 +8,7 @@ using CarPark.Models;
 using CarPark.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using System.Drawing.Printing;
 
 namespace CarPark.Controllers
 {
@@ -32,16 +33,21 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
+            const int PAGE_SIZE = 20;
 
-            var drivers = await userDrivers
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId)
                 .Include(d => d.ActiveVehicle)
-                .Include(d => d.Enterprise)
-                .ToListAsync();
+                .Include(d => d.Enterprise);
 
-            return View(drivers);
+            var driversForPage = userDrivers
+                .Skip((page - 1) * PAGE_SIZE)
+                .Take(PAGE_SIZE);
+
+            var driversTotalAmount = await userDrivers.CountAsync();
+            var pageViewModel = new PaginationViewModel<Driver>(driversForPage, driversTotalAmount, PAGE_SIZE, page);
+            return View(pageViewModel);
         }
 
         // GET: Drivers/Details/5

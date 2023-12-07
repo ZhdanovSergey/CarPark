@@ -1,4 +1,7 @@
-﻿@model IEnumerable<CarPark.Models.Vehicle>
+﻿@using CarPark.Models;
+@using CarPark.ViewModels;
+
+@model PaginationViewModel<Vehicle>
 
 <h4>Vehicles</h4>
 <hr />
@@ -7,33 +10,37 @@
 </p>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.RegistrationNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Enterprise)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Brand)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mileage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Year)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ActiveDriver)
-            </th>
-            <th>Actions</th>
-        </tr>
+        @{
+            var modelItem = new Vehicle();
+
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.RegistrationNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Enterprise)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Brand)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Mileage)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Price)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Year)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.ActiveDriver)
+                </th>
+                <th>Actions</th>
+            </tr>
+        }
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td>
@@ -66,3 +73,15 @@
         }
     </tbody>
 </table>
+
+@if (Model.HasPreviousPage)
+{
+    <a asp-action="Index" asp-route-page="@(Model.PageNumber - 1)">Назад</a>
+}
+
+<span>Страница @Model.PageNumber</span>
+
+@if (Model.HasNextPage)
+{
+    <a asp-action="Index" asp-route-page="@(Model.PageNumber + 1)">Вперед</a>
+}

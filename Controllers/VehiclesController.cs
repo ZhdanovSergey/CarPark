@@ -32,18 +32,22 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            if (_context.Vehicles == null)
-                return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+            const int PAGE_SIZE = 20;
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId)
+                .Include(m => m.ActiveDriver)
+                .Include(m => m.Brand)
+                .Include(m => m.Enterprise);
 
-            return View(await userVehicles
-                    .Include(m => m.ActiveDriver)
-                    .Include(m => m.Brand)
-                    .Include(m => m.Enterprise)
-                    .ToListAsync());
+            var vehiclesForPage = userVehicles
+                .Skip((page - 1) * PAGE_SIZE)
+                .Take(PAGE_SIZE);
+
+            var vehiclesTotalAmount = await userVehicles.CountAsync();
+            var pageViewModel = new PaginationViewModel<Vehicle>(vehiclesForPage, vehiclesTotalAmount, PAGE_SIZE, page);
+            return View(pageViewModel);
         }
 
         // GET: Lists/Details/5
