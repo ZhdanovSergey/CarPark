@@ -1,6 +1,6 @@
-﻿namespace CarPark.ViewModels;
+﻿namespace CarPark.Models;
 
-public class PaginationViewModel<TDataItem> where TDataItem : class
+public class Pagination<TDataItem> where TDataItem : class
 {
     public IEnumerable<TDataItem> Items { get; }
     public int PageNumber { get; }
@@ -8,9 +8,11 @@ public class PaginationViewModel<TDataItem> where TDataItem : class
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
 
-    public PaginationViewModel(IEnumerable<TDataItem> items, int totalItems, int pageSize, int pageNumber)
+    public Pagination(IEnumerable<TDataItem> items, int pageSize, int pageNumber)
     {
-        Items = items;
+        var totalItems = items.Count();
+
+        Items = items.Skip((pageNumber - 1) * pageSize).Take(pageSize);
         PageNumber = pageNumber;
         TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
     }

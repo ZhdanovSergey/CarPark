@@ -37,18 +37,17 @@ namespace CarPark.API
 
         // GET: api/Drivers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DriverAPIModel>>> GetDrivers()
+        public async Task<ActionResult<Pagination<DriverAPIModel>>> GetDrivers(int page = 1, int pageSize = 20)
         {
-            if (_context.Drivers == null)
+            if (_context.Drivers is null)
                 return NotFound();
 
-            var userDrivers = Driver.GetUserDrivers(_context, User, _userId);
-
-            return await userDrivers
+            var userDrivers = Driver.GetUserDrivers(_context, User, _userId)
                   .Include(d => d.ActiveVehicle)
                   .Include(d => d.DriversVehicles)
-                  .Select(d => new DriverAPIModel(d))
-                  .ToListAsync();
+                  .Select(d => new DriverAPIModel(d));
+
+            return new Pagination<DriverAPIModel>(userDrivers, pageSize, page);
         }
 
         // GET: api/Drivers/5

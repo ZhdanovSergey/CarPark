@@ -37,17 +37,16 @@ namespace CarPark.API
 
         // GET: api/Vehicles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VehicleAPIModel>>> GetVehicles()
+        public async Task<ActionResult<Pagination<VehicleAPIModel>>> GetVehicles(int page = 1, int pageSize = 20)
         {
-            if (_context.Vehicles == null)
+            if (_context.Vehicles is null)
                 return NotFound();
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
-
-            return await userVehicles
+            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId)
                 .Include(v => v.DriversVehicles)
-                .Select(v => new VehicleAPIModel(v))
-                .ToListAsync();
+                .Select(v => new VehicleAPIModel(v));
+
+            return new Pagination<VehicleAPIModel>(userVehicles, pageSize, page);
         }
 
         // GET: api/Vehicles/5

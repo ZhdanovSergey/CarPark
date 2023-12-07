@@ -37,17 +37,15 @@ namespace CarPark.Controllers
         {
             const int PAGE_SIZE = 20;
 
+            if (_context.Drivers == null)
+                return Problem("Entity set 'AppDbContext.Drivers'  is null.");
+
             var userDrivers = Driver.GetUserDrivers(_context, User, _userId)
                 .Include(d => d.ActiveVehicle)
                 .Include(d => d.Enterprise);
 
-            var driversForPage = userDrivers
-                .Skip((page - 1) * PAGE_SIZE)
-                .Take(PAGE_SIZE);
-
-            var driversTotalAmount = await userDrivers.CountAsync();
-            var pageViewModel = new PaginationViewModel<Driver>(driversForPage, driversTotalAmount, PAGE_SIZE, page);
-            return View(pageViewModel);
+            var driversWithpagination = new Pagination<Driver>(userDrivers, PAGE_SIZE, page);
+            return View(driversWithpagination);
         }
 
         // GET: Drivers/Details/5

@@ -36,18 +36,16 @@ namespace CarPark.Controllers
         {
             const int PAGE_SIZE = 20;
 
+            if (_context.Vehicles == null)
+                return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
+
             var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId)
                 .Include(m => m.ActiveDriver)
                 .Include(m => m.Brand)
                 .Include(m => m.Enterprise);
 
-            var vehiclesForPage = userVehicles
-                .Skip((page - 1) * PAGE_SIZE)
-                .Take(PAGE_SIZE);
-
-            var vehiclesTotalAmount = await userVehicles.CountAsync();
-            var pageViewModel = new PaginationViewModel<Vehicle>(vehiclesForPage, vehiclesTotalAmount, PAGE_SIZE, page);
-            return View(pageViewModel);
+            var vehiclesWithpagination = new Pagination<Vehicle>(userVehicles, PAGE_SIZE, page);
+            return View(vehiclesWithpagination);
         }
 
         // GET: Lists/Details/5
