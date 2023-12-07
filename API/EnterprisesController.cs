@@ -20,20 +20,10 @@ namespace CarPark.API
     public class EnterprisesController : ControllerBase
     {
         readonly ApplicationDbContext _context;
-        readonly int _userId;
 
-        public EnterprisesController
-        (
-            ApplicationDbContext context,
-            IHttpContextAccessor contextAccessor,
-            UserManager<ApplicationUser> userManager
-        )
+        public EnterprisesController(ApplicationDbContext context)
         {
             _context = context;
-
-            var user = contextAccessor.HttpContext?.User;
-            string? userId = user is not null ? userManager.GetUserId(user) : null;
-            _userId = Int32.Parse(userId ?? "");
         }
 
         // GET: api/Enterprises
@@ -43,14 +33,11 @@ namespace CarPark.API
             if (_context.Enterprises == null)
                 return NotFound();
 
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
-
-            return await userEnterprises
-                .Include(e => e.Drivers)
-                    .ThenInclude(d => d.ActiveVehicle)
-                .Include(e => e.Vehicles)
+            var userEnterprises = await Enterprise.GetUserEnterprises(_context, User)
                 .Select(e => new EnterpriseAPIModel(e))
                 .ToListAsync();
+
+            return userEnterprises;
         }
 
         // GET: api/Enterprises/5
@@ -61,15 +48,12 @@ namespace CarPark.API
                 return NotFound();
 
             var enterprise = await _context.Enterprises
-                .Include(e => e.Drivers)
-                    .ThenInclude(d => d.ActiveVehicle)
-                .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (enterprise == null)
                 return NotFound();
 
-            if (!(await Enterprise.CheckAccess(id, _context, User, _userId)))
+            if (!(await Enterprise.CheckAccess(id, _context, User)))
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             return new EnterpriseAPIModel(enterprise);
@@ -83,7 +67,7 @@ namespace CarPark.API
             if (id != enterprise.Id)
                 return BadRequest();
 
-            if (!(await Enterprise.CheckAccess(id, _context, User, _userId)))
+            if (!(await Enterprise.CheckAccess(id, _context, User)))
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             _context.Entry(enterprise).State = EntityState.Modified;
@@ -111,7 +95,7 @@ namespace CarPark.API
             if (_context.Enterprises == null)
                 return Problem("Entity set 'AppDbContext.Enterprises'  is null.");
 
-            await enterprise.SaveAndBindWithManager(_context, User, _userId);
+            await enterprise.SaveAndBindWithManager(_context, User);
             return CreatedAtAction("GetEnterprise", new { id = enterprise.Id }, new EnterpriseAPIModel(enterprise));
         }
 
@@ -127,7 +111,7 @@ namespace CarPark.API
             if (enterprise == null)
                 return NotFound();
 
-            if (!(await Enterprise.CheckAccess(id, _context, User, _userId)))
+            if (!(await Enterprise.CheckAccess(id, _context, User)))
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             _context.Enterprises.Remove(enterprise);

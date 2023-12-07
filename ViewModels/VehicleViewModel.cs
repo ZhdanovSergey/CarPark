@@ -38,11 +38,10 @@ namespace CarPark.ViewModels
         public void AddSelectLists
         (
             ApplicationDbContext dbContext,
-            ClaimsPrincipal claimsPrincipal,
-            int userId
+            ClaimsPrincipal claimsPrincipal
         )
         {
-            var userEnterprises = Enterprise.GetUserEnterprises(dbContext, claimsPrincipal, userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(dbContext, claimsPrincipal);
 
             var driversWithSameEnterprise = dbContext.Drivers
                 .Where(v => v.EnterpriseId == this.EnterpriseId);

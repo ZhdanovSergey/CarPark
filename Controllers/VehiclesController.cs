@@ -15,20 +15,10 @@ namespace CarPark.Controllers
     public class VehiclesController : Controller
     {
         private readonly ApplicationDbContext _context;
-        readonly int _userId;
 
-        public VehiclesController
-        (
-            ApplicationDbContext context,
-            IHttpContextAccessor contextAccessor,
-            UserManager<ApplicationUser> userManager
-        )
+        public VehiclesController(ApplicationDbContext context)
         {
             _context = context;
-
-            var user = contextAccessor.HttpContext?.User;
-            string? userId = user is not null ? userManager.GetUserId(user) : null;
-            _userId = Int32.Parse(userId ?? "");
         }
 
         // GET: Lists
@@ -39,12 +29,12 @@ namespace CarPark.Controllers
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId)
+            var userVehicles = Vehicle.GetUserVehicles(_context, User)
                 .Include(m => m.ActiveDriver)
                 .Include(m => m.Brand)
                 .Include(m => m.Enterprise);
 
-            var vehiclesWithpagination = new Pagination<Vehicle>(userVehicles, PAGE_SIZE, page);
+            var vehiclesWithpagination = await Pagination<Vehicle>.PaginationAsync(userVehicles, PAGE_SIZE, page);
             return View(vehiclesWithpagination);
         }
 
@@ -54,7 +44,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User);
 
             var vehicle = await userVehicles
                 .Include(m => m.ActiveDriver)
@@ -74,7 +64,7 @@ namespace CarPark.Controllers
         public async Task<IActionResult> Create()
         {
             var vehicleVM = new VehicleViewModel();
-            vehicleVM.AddSelectLists(_context, User, _userId);
+            vehicleVM.AddSelectLists(_context, User);
             return View(vehicleVM);
         }
 
@@ -93,7 +83,7 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            vehicleVM.AddSelectLists(_context, User, _userId);
+            vehicleVM.AddSelectLists(_context, User);
             return View(vehicleVM);
         }
 
@@ -103,7 +93,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User);
 
             var vehicle = await userVehicles
                 .Include(d => d.DriversVehicles)
@@ -114,7 +104,7 @@ namespace CarPark.Controllers
                 return NotFound();
 
             var vehicleVM = new VehicleViewModel(vehicle);
-            vehicleVM.AddSelectLists(_context, User, _userId);
+            vehicleVM.AddSelectLists(_context, User);
 
             return View(vehicleVM);
         }
@@ -126,8 +116,8 @@ namespace CarPark.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,EnterpriseId,BrandId,Price,RegistrationNumber,Year,Mileage,DriversIds,ActiveDriverId")] VehicleViewModel vehicleVM)
         {
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
 
             if
             (
@@ -179,7 +169,7 @@ namespace CarPark.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            vehicleVM.AddSelectLists(_context, User, _userId);
+            vehicleVM.AddSelectLists(_context, User);
             return View(vehicleVM);
         }
 
@@ -189,7 +179,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Vehicles == null)
                 return NotFound();
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User);
 
             var vehicle = await userVehicles
                 .Include(v => v.ActiveDriver)
@@ -213,7 +203,7 @@ namespace CarPark.Controllers
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User);
             var vehicle = await userVehicles.FirstOrDefaultAsync(uv => uv.Id == id);
 
             if (vehicle != null)
@@ -225,7 +215,7 @@ namespace CarPark.Controllers
 
         private bool VehicleExists(int id)
         {
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId);
+            var userVehicles = Vehicle.GetUserVehicles(_context, User);
             return (userVehicles?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }

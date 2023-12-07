@@ -36,8 +36,7 @@ namespace CarPark.Models
         public static IQueryable<Vehicle> GetUserVehicles
         (
             ApplicationDbContext dbContext,
-            ClaimsPrincipal claimsPrincipal,
-            int userId
+            ClaimsPrincipal claimsPrincipal
         )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
@@ -45,6 +44,8 @@ namespace CarPark.Models
 
             if (claimsPrincipal.IsInRole(RoleNames.Manager))
             {
+                var userId = ApplicationUser.GetUserId(claimsPrincipal);
+
                 return dbContext.Vehicles
                     .Include(v => v.Enterprise)
                         .ThenInclude(e => e.EnterprisesManagers)

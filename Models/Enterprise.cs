@@ -19,12 +19,13 @@ namespace CarPark.Models
         (
             int enterpriseId,
             ApplicationDbContext dbContext,
-            ClaimsPrincipal claimsPrincipal,
-            int userId
+            ClaimsPrincipal claimsPrincipal
         )
         {
             if (!claimsPrincipal.IsInRole(RoleNames.Manager))
                 return true;
+
+            var userId = ApplicationUser.GetUserId(claimsPrincipal);
 
             var enterpriseManager = await dbContext.EnterprisesManagers
                 .FirstOrDefaultAsync(em => em.EnterpriseId == enterpriseId && em.ManagerId == userId);
@@ -34,8 +35,7 @@ namespace CarPark.Models
         public static IQueryable<Enterprise> GetUserEnterprises
         (
             ApplicationDbContext dbContext,
-            ClaimsPrincipal claimsPrincipal,
-            int userId
+            ClaimsPrincipal claimsPrincipal
         )
         {
             if (claimsPrincipal.IsInRole(RoleNames.Admin))
@@ -43,6 +43,8 @@ namespace CarPark.Models
 
             if (claimsPrincipal.IsInRole(RoleNames.Manager))
             {
+                var userId = ApplicationUser.GetUserId(claimsPrincipal);
+
                 return dbContext.Enterprises
                     .Include(e => e.EnterprisesManagers)
                     .Where(e => e.EnterprisesManagers.Any(em => em.ManagerId == userId));
@@ -53,8 +55,7 @@ namespace CarPark.Models
         public async Task SaveAndBindWithManager
         (
             ApplicationDbContext dbContext,
-            ClaimsPrincipal claimsPrincipal,
-            int userId
+            ClaimsPrincipal claimsPrincipal
         )
         {
             dbContext.Add(this);
@@ -69,7 +70,7 @@ namespace CarPark.Models
                 dbContext.Add(new EnterpriseManager
                 {
                     EnterpriseId = savedEnterprise.Id,
-                    ManagerId = userId,
+                    ManagerId = ApplicationUser.GetUserId(claimsPrincipal),
                 });
 
                 await dbContext.SaveChangesAsync();

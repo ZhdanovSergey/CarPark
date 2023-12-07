@@ -19,20 +19,10 @@ namespace CarPark.API
     public class VehiclesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        readonly int _userId;
 
-        public VehiclesController
-        (
-            ApplicationDbContext context,
-            IHttpContextAccessor contextAccessor,
-            UserManager<ApplicationUser> userManager
-        )
+        public VehiclesController(ApplicationDbContext context)
         {
             _context = context;
-
-            var user = contextAccessor.HttpContext?.User;
-            string? userId = user is not null ? userManager.GetUserId(user) : null;
-            _userId = Int32.Parse(userId ?? "");
         }
 
         // GET: api/Vehicles
@@ -42,11 +32,11 @@ namespace CarPark.API
             if (_context.Vehicles is null)
                 return NotFound();
 
-            var userVehicles = Vehicle.GetUserVehicles(_context, User, _userId)
+            var userVehicles = Vehicle.GetUserVehicles(_context, User)
                 .Include(v => v.DriversVehicles)
                 .Select(v => new VehicleAPIModel(v));
 
-            return new Pagination<VehicleAPIModel>(userVehicles, pageSize, page);
+            return await Pagination<VehicleAPIModel>.PaginationAsync(userVehicles, pageSize, page);
         }
 
         // GET: api/Vehicles/5
@@ -63,7 +53,7 @@ namespace CarPark.API
             if (vehicle == null)
                 return NotFound();
 
-            if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User, _userId)))
+            if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User)))
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             return new VehicleAPIModel(vehicle);
@@ -82,8 +72,8 @@ namespace CarPark.API
             if (prevVehicle is null)
                 return NotFound();
 
-            var hasAccessToPrevVehicle = await Enterprise.CheckAccess(prevVehicle.EnterpriseId, _context, User, _userId);
-            var hasAccessToVehicle = await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User, _userId);
+            var hasAccessToPrevVehicle = await Enterprise.CheckAccess(prevVehicle.EnterpriseId, _context, User);
+            var hasAccessToVehicle = await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User);
 
             if (!hasAccessToPrevVehicle || !hasAccessToVehicle)
                 return StatusCode(StatusCodes.Status403Forbidden);
@@ -113,7 +103,7 @@ namespace CarPark.API
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
 
-            if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User, _userId)))
+            if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User)))
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             _context.Vehicles.Add(vehicle);
@@ -134,7 +124,7 @@ namespace CarPark.API
             if (vehicle == null)
                 return NotFound();
 
-            if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User, _userId)))
+            if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User)))
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             _context.Vehicles.Remove(vehicle);

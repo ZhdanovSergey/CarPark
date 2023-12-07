@@ -16,20 +16,10 @@ namespace CarPark.Controllers
     public class EnterprisesController : Controller
     {
         readonly ApplicationDbContext _context;
-        readonly int _userId;
 
-        public EnterprisesController
-        (
-            ApplicationDbContext context,
-            IHttpContextAccessor contextAccessor,
-            UserManager<ApplicationUser> userManager
-        )
+        public EnterprisesController(ApplicationDbContext context)
         {
             _context = context;
-
-            var user = contextAccessor.HttpContext?.User;
-            string? userId = user is not null ? userManager.GetUserId(user) : null;
-            _userId = Int32.Parse(userId ?? "");
         }
 
         // GET: Enterprises
@@ -38,12 +28,8 @@ namespace CarPark.Controllers
             if (_context.Enterprises == null)
                 return Problem("Entity set 'AppDbContext.Enterprise'  is null.");
 
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
-
-            return View(await userEnterprises
-                .Include(e => e.Drivers)
-                .Include(e => e.Vehicles)
-                .ToListAsync());
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
+            return View(await userEnterprises.ToListAsync());
         }
 
         // GET: Enterprises/Details/5
@@ -52,12 +38,10 @@ namespace CarPark.Controllers
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
 
             var enterprise = await userEnterprises
                 .Include(e => e.EnterprisesManagers)
-                .Include(e => e.Drivers)
-                .Include(e => e.Vehicles)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (enterprise == null)
@@ -81,7 +65,7 @@ namespace CarPark.Controllers
         {
             if (ModelState.IsValid)
             {
-                await enterprise.SaveAndBindWithManager(_context, User, _userId);
+                await enterprise.SaveAndBindWithManager(_context, User);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -94,7 +78,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
 
             var enterprise = await userEnterprises
                 .Where(ue => ue.Id == id)
@@ -113,7 +97,7 @@ namespace CarPark.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,City")] Enterprise enterprise)
         {
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
 
             if (id != enterprise.Id || await userEnterprises.AllAsync(ue => ue.Id != enterprise.Id))
                 return NotFound();
@@ -145,7 +129,7 @@ namespace CarPark.Controllers
             if (id == null || _context.Enterprises == null)
                 return NotFound();
 
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
 
             var enterprise = await userEnterprises
                 .Include(e => e.Drivers)
@@ -166,7 +150,7 @@ namespace CarPark.Controllers
             if (_context.Enterprises == null)
                 return Problem("Entity set 'AppDbContext.Enterprise'  is null.");
 
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
 
             var enterprise = await userEnterprises
                 .Where(ue => ue.Id == id)
@@ -182,7 +166,7 @@ namespace CarPark.Controllers
 
         private bool EnterpriseExists(int id)
         {
-            var userEnterprises = Enterprise.GetUserEnterprises(_context, User, _userId);
+            var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
             return (userEnterprises?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
