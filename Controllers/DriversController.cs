@@ -23,19 +23,23 @@ namespace CarPark.Controllers
         }
 
         // GET: Drivers
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int page = 1, int enterpriseId = 0)
         {
-            const int PAGE_SIZE = 20;
-
             if (_context.Drivers == null)
                 return Problem("Entity set 'AppDbContext.Drivers'  is null.");
 
             var userDrivers = Driver.GetUserDrivers(_context, User)
+                .Where(v => enterpriseId == 0 || v.EnterpriseId == enterpriseId)
                 .Include(d => d.ActiveVehicle)
                 .Include(d => d.Enterprise);
 
-            var driversWithpagination = await Pagination<Driver>.PaginationAsync(userDrivers, PAGE_SIZE, page);
-            return View(driversWithpagination);
+            var paginationWithEnterpriseFilter = new PaginationWithEnterpriseFilter<Driver>()
+            {
+                Pagination = await Pagination<Driver>.PaginationAsync(userDrivers, page),
+                EnterpriseFilter = await EnterpriseFilter.EnterpriseFilterAsync(_context, User, enterpriseId),
+            };
+
+            return View(paginationWithEnterpriseFilter);
         }
 
         // GET: Drivers/Details/5

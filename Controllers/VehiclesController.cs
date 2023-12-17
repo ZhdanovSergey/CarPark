@@ -22,20 +22,24 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int page = 1, int enterpriseId = 0)
         {
-            const int PAGE_SIZE = 20;
-
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
 
             var userVehicles = Vehicle.GetUserVehicles(_context, User)
-                .Include(m => m.ActiveDriver)
-                .Include(m => m.Brand)
-                .Include(m => m.Enterprise);
+                .Where(v => enterpriseId == 0 || v.EnterpriseId == enterpriseId)
+                .Include(v => v.ActiveDriver)
+                .Include(v => v.Brand)
+                .Include(v => v.Enterprise);
 
-            var vehiclesWithpagination = await Pagination<Vehicle>.PaginationAsync(userVehicles, PAGE_SIZE, page);
-            return View(vehiclesWithpagination);
+            var paginationWithEnterpriseFilter = new PaginationWithEnterpriseFilter<Vehicle>()
+            {
+                Pagination = await Pagination<Vehicle>.PaginationAsync(userVehicles, page),
+                EnterpriseFilter = await EnterpriseFilter.EnterpriseFilterAsync(_context, User, enterpriseId),
+            };
+
+            return View(paginationWithEnterpriseFilter);
         }
 
         // GET: Lists/Details/5
@@ -47,12 +51,12 @@ namespace CarPark.Controllers
             var userVehicles = Vehicle.GetUserVehicles(_context, User);
 
             var vehicle = await userVehicles
-                .Include(m => m.ActiveDriver)
+                .Include(v => v.ActiveDriver)
                 .Include(v => v.Brand)
                 .Include(v => v.Enterprise)
                 .Include(v => v.DriversVehicles)
                     .ThenInclude(d => d.Driver)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
                 return NotFound();

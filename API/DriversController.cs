@@ -27,17 +27,18 @@ namespace CarPark.API
 
         // GET: api/Drivers
         [HttpGet]
-        public async Task<ActionResult<Pagination<DriverAPIModel>>> GetDrivers(int page = 1, int pageSize = 20)
+        public async Task<ActionResult<Pagination<DriverAPIModel>>> GetDrivers(int page = 1, int pageSize = 20, int enterpriseId = 0)
         {
             if (_context.Drivers is null)
                 return NotFound();
 
             var userDrivers = Driver.GetUserDrivers(_context, User)
-                  .Include(d => d.ActiveVehicle)
-                  .Include(d => d.DriversVehicles)
-                  .Select(d => new DriverAPIModel(d));
+                .Where(v => enterpriseId == 0 || v.EnterpriseId == enterpriseId)
+                .Include(d => d.ActiveVehicle)
+                .Include(d => d.DriversVehicles)
+                .Select(d => new DriverAPIModel(d));
 
-            return await Pagination<DriverAPIModel>.PaginationAsync(userDrivers, pageSize, page);
+            return await Pagination<DriverAPIModel>.PaginationAsync(userDrivers, page, pageSize);
         }
 
         // GET: api/Drivers/5

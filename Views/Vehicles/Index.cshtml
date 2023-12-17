@@ -1,11 +1,20 @@
 ﻿@using CarPark.Models;
+@using CarPark.ViewModels;
 
-@model Pagination<Vehicle>
+@model PaginationWithEnterpriseFilter<Vehicle>
 
 <h4>Vehicles</h4>
 <hr />
 <p>
     <a asp-action="Create">Create New</a>
+</p>
+<p>
+    <span>Enterprises:</span>
+    <a asp-action="Index">All</a>
+    @foreach (var enterprise in Model.EnterpriseFilter.UserEnterprises)
+    {
+        <a asp-action="Index" asp-route-enterpriseId="@enterprise.Id">@enterprise.Name</a>
+    }
 </p>
 <table class="table">
     <thead>
@@ -39,7 +48,7 @@
         }
     </thead>
     <tbody>
-        @foreach (var item in Model.Items)
+        @foreach (var item in Model.Pagination.Items)
         {
             <tr>
                 <td>
@@ -73,14 +82,26 @@
     </tbody>
 </table>
 
-@if (Model.HasPreviousPage)
+@if (Model.Pagination.HasPreviousPage)
 {
-    <a asp-action="Index" asp-route-page="@(Model.PageNumber - 1)">Назад</a>
+    <a
+        asp-action="Index"
+        asp-route-page="@(Model.Pagination.PageNumber - 1)"
+        asp-route-enterpriseId="@Model.EnterpriseFilter.SelectedId"
+    >
+        Назад
+    </a>
 }
 
-<span>Страница @Model.PageNumber</span>
+<span>Страница @Model.Pagination.PageNumber</span>
 
-@if (Model.HasNextPage)
+@if (Model.Pagination.HasNextPage)
 {
-    <a asp-action="Index" asp-route-page="@(Model.PageNumber + 1)">Вперед</a>
+    <a
+        asp-action="Index"
+        asp-route-page="@(Model.Pagination.PageNumber + 1)"
+        asp-route-enterpriseId="@Model.EnterpriseFilter.SelectedId"
+    >
+        Вперед
+    </a>
 }
