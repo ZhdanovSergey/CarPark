@@ -6,14 +6,14 @@ using System.Text.Json;
 
 namespace CarPark.Extentions
 {
-    public static class WebApplicationExtentions
+    public static class ApplicationBuilderExtentions
     {
-        public static WebApplication UseSeedData(this WebApplication builder)
+        public static IApplicationBuilder UseSeedData(this IApplicationBuilder builder)
         {
             const string ADMIN_USER_NAME = "admin";
             const string ADMIN_USER_PASSWORD = "Admin1!";
 
-            using var scope = builder.Services.CreateScope();
+            using var scope = builder.ApplicationServices.CreateScope();
 
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();

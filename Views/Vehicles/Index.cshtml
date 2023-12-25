@@ -21,30 +21,33 @@
         @{
             var modelItem = new Vehicle();
 
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.RegistrationNumber)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.Enterprise)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.Brand)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.Mileage)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.Price)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.Year)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.ActiveDriver)
-                </th>
-                <th>Actions</th>
-            </tr>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.RegistrationNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.PurchaceDateTime)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.Enterprise)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.Brand)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.Mileage)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.Price)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.Year)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => modelItem.ActiveDriver)
+                            </th>
+                            <th>Actions</th>
+                        </tr>
         }
     </thead>
     <tbody>
@@ -54,6 +57,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.RegistrationNumber)
                 </td>
+                <td data-utc-date="@item.PurchaceDateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")" data-enterprise-utc-offset="@item.Enterprise.UtcOffset.TotalMinutes"></td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Enterprise.Name)
                 </td>
@@ -105,3 +109,18 @@
         Вперед
     </a>
 }
+
+<script>
+    document.querySelectorAll("[data-utc-date]").forEach((element) => {
+        const utcDate = new Date(element.getAttribute("data-utc-date"));
+        const localUtcOffset = new Date().getTimezoneOffset();
+
+        if (localUtcOffset) {
+            element.textContent = utcDate.toLocaleString("ru-RU");
+        } else {
+            const enterpriseUtcOffset = parseInt(element.getAttribute("data-enterprise-utc-offset"));
+            const enterpriseDate = new Date(utcDate.setUTCMinutes(utcDate.getUTCMinutes() + enterpriseUtcOffset));
+            element.textContent = enterpriseDate.toLocaleString("ru-RU", { timeZone: "UTC" });
+        }
+    });
+</script>

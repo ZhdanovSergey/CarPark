@@ -29,9 +29,9 @@ namespace CarPark.Controllers
 
             var userVehicles = Vehicle.GetUserVehicles(_context, User)
                 .Where(v => enterpriseId == 0 || v.EnterpriseId == enterpriseId)
+                .Include(v => v.Enterprise)
                 .Include(v => v.ActiveDriver)
-                .Include(v => v.Brand)
-                .Include(v => v.Enterprise);
+                .Include(v => v.Brand);
 
             var paginationWithEnterpriseFilter = new PaginationWithEnterpriseFilter<Vehicle>()
             {

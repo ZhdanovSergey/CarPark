@@ -34,6 +34,7 @@ namespace CarPark.API
 
             var userVehicles = Vehicle.GetUserVehicles(_context, User)
                 .Where(v => enterpriseId == 0 || v.EnterpriseId == enterpriseId)
+                .Include(v => v.Enterprise)
                 .Include(v => v.DriversVehicles)
                 .Select(v => new VehicleAPIModel(v));
 
@@ -48,6 +49,7 @@ namespace CarPark.API
                 return NotFound();
 
             var vehicle = await _context.Vehicles
+                .Include(v => v.Enterprise)
                 .Include(v => v.DriversVehicles)
                 .FirstOrDefaultAsync(v => v.Id == id);
 
