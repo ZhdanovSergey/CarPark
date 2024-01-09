@@ -1,8 +1,5 @@
 ﻿using CarPark.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using System.Text.Json;
 
 namespace CarPark.Extentions
 {

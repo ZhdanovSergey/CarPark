@@ -67,3 +67,41 @@
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
     <a asp-action="Index">Back to List</a>
 </div>
+
+<hr/>
+
+<table class="table">
+    <thead>
+        @{
+            var modelItem = new Location();
+
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Time)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Latitude)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => modelItem.Longitude)
+                </th>
+            </tr>
+        }
+    </thead>
+    <tbody>
+        @foreach (var location in Model.Locations)
+        {
+            <tr>
+                <td>
+                    @location.Time
+                </td>
+                <td>
+                    @location.Latitude
+                </td>
+                <td>
+                    @location.Longitude
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

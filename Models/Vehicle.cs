@@ -19,6 +19,7 @@ public class Vehicle
     public Driver? ActiveDriver { get; set; }
     public Enterprise? Enterprise { get; set; }
     public List<DriverVehicle> DriversVehicles { get; set; } = new();
+    public List<Location> Locations { get; set; } = new();
     public Vehicle() { }
     public Vehicle(VehicleViewModel vehicleVM)
     {

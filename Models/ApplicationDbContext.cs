@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarPark.Models
@@ -10,10 +9,10 @@ namespace CarPark.Models
         public DbSet<Enterprise> Enterprises { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Location> Locations { get; set; }
         public DbSet<DriverVehicle> DriversVehicles { get; set; }
         public DbSet<EnterpriseManager> EnterprisesManagers { get; set; }
         public DbSet<Brand> Brands { get; set; }
-
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,11 +28,11 @@ namespace CarPark.Models
                 .WithOne(v => v.Enterprise)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<DriverVehicle>()
-                .HasKey(dv => new { dv.EnterpriseId, dv.DriverId, dv.VehicleId });
-
             modelBuilder.Entity<EnterpriseManager>()
                 .HasKey(em => new { em.EnterpriseId, em.ManagerId });
+
+            modelBuilder.Entity<DriverVehicle>()
+                .HasKey(dv => new { dv.EnterpriseId, dv.DriverId, dv.VehicleId });
         }
     }
 }

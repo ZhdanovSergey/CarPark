@@ -54,6 +54,7 @@ namespace CarPark.Controllers
                 .Include(v => v.ActiveDriver)
                 .Include(v => v.Brand)
                 .Include(v => v.Enterprise)
+                .Include(v => v.Locations)
                 .Include(v => v.DriversVehicles)
                     .ThenInclude(d => d.Driver)
                 .FirstOrDefaultAsync(v => v.Id == id);
