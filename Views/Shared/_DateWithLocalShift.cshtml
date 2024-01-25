@@ -1,0 +1,10 @@
+﻿<script>
+    document.querySelectorAll("[data-date]").forEach((element) => {
+        const dateString = element.getAttribute("data-date");
+        const enterprizeTimeZone = dateString.slice(-6);
+        const date = new Date(dateString);
+        const locaTimezoneOffset = new Date().getTimezoneOffset();
+        const shiftedToLocalDate = new Date(date.setMinutes(date.getMinutes() - locaTimezoneOffset));
+        element.textContent = shiftedToLocalDate.toLocaleString('ru-RU', { timeZone: enterprizeTimeZone });
+    });
+</script>

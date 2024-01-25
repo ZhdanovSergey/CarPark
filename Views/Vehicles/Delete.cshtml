@@ -12,6 +12,10 @@
             @Html.DisplayFor(model => model.RegistrationNumber)
         </dd>
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PurchaceDateTimeOffset)
+        </dt>
+        <dd class="col-sm-10" data-date="@Model.PurchaceDateTimeOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz")"></dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Enterprise)
         </dt>
         <dd class="col-sm-10">
@@ -64,3 +68,5 @@
         <a asp-action="Index">Back to List</a>
     </form>
 </div>
+
+@Html.Partial("_DateWithLocalShift")

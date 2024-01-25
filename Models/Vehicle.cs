@@ -1,5 +1,6 @@
 ﻿using CarPark.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 
 namespace CarPark.Models;
@@ -12,6 +13,19 @@ public class Vehicle
     public int EnterpriseId { get; set; }
     public string RegistrationNumber { get; set; }
     public DateTime PurchaceDateTime { get; set; }
+    public DateTimeOffset PurchaceDateTimeOffset
+    {
+        get
+        {
+            if (Enterprise is null)
+                throw new Exception($"{nameof(Enterprise)} should be included");
+
+            var enterpriseTimeZone = TimeZoneInfo.FindSystemTimeZoneById(Enterprise.TimeZoneId);
+
+            return new DateTimeOffset(PurchaceDateTime, TimeSpan.Zero)
+                .ToOffset(enterpriseTimeZone.GetUtcOffset(PurchaceDateTime));
+        }
+    }
     public int Mileage { get; set; }
     public int Price { get; set; }
     public int Year { get; set; }

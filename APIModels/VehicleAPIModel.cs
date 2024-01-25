@@ -9,7 +9,7 @@ public class VehicleAPIModel
     public int BrandId { get; set; }
     public int EnterpriseId { get; set; }
     public string RegistrationNumber { get; set; }
-    public DateTime PurchaceDateTime { get; set; }
+    public DateTimeOffset PurchaceDateTimeOffset { get; set; }
     public int Mileage { get; set; }
     public int Price { get; set; }
     public int Year { get; set; }
@@ -21,7 +21,7 @@ public class VehicleAPIModel
         BrandId = vehicle.BrandId;
         EnterpriseId = vehicle.EnterpriseId;
         RegistrationNumber = vehicle.RegistrationNumber;
-        PurchaceDateTime = vehicle.PurchaceDateTime + vehicle.Enterprise.UtcOffset;
+        PurchaceDateTimeOffset = vehicle.PurchaceDateTimeOffset;
         Mileage = vehicle.Mileage;
         Price = vehicle.Price;
         Year = vehicle.Year;
