@@ -17,7 +17,8 @@ namespace CarPark
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb; Database=CarParkDB; Trusted_Connection=True"));
+                options.UseSqlServer(@"Server=(localdb)\mssqllocaldb; Database=CarParkDB; Trusted_Connection=True",
+                    sqlServerOptions => sqlServerOptions.UseNetTopologySuite()));
 
             builder.Services
                 .AddIdentityCore<ApplicationUser>()

@@ -72,42 +72,35 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
-<hr/>
+@if (Model.Locations.Count > 0)
+{
+    <hr />
 
-<table class="table">
-    <thead>
-        @{
-            var modelItem = new Location();
-
+    <table class="table">
+        <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => modelItem.Time)
+                    @Html.DisplayNameFor(model => model.Locations[0].DateTime)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => modelItem.Latitude)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => modelItem.Longitude)
+                    @Html.DisplayNameFor(model => model.Locations[0].Point)
                 </th>
             </tr>
-        }
-    </thead>
-    <tbody>
-        @foreach (var location in Model.Locations)
-        {
-            <tr>
-                <td>
-                    @location.Time
-                </td>
-                <td>
-                    @location.Latitude
-                </td>
-                <td>
-                    @location.Longitude
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var location in Model.Locations)
+            {
+                <tr>
+                    <td>
+                        @location.DateTime
+                    </td>
+                    <td>
+                        @location.Point
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-@Html.Partial("_DateWithLocalShift")
+    @Html.Partial("_DateWithLocalShift")
+}

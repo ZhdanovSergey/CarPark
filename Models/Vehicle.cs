@@ -1,6 +1,5 @@
 ﻿using CarPark.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 
 namespace CarPark.Models;
