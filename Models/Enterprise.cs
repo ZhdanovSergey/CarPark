@@ -40,6 +40,13 @@ public class Enterprise
 
         return enterpriseManager is not null;
     }
+    public DateTimeOffset ConvertTimeToTimeZone(DateTime dateTime)
+    {
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId);
+
+        return new DateTimeOffset(dateTime, TimeSpan.Zero)
+            .ToOffset(timeZone.GetUtcOffset(dateTime));
+    }
     public static IQueryable<Enterprise> GetUserEnterprises
     (
         ApplicationDbContext dbContext,

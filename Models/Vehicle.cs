@@ -19,10 +19,7 @@ public class Vehicle
             if (Enterprise is null)
                 throw new Exception($"{nameof(Enterprise)} should be included");
 
-            var enterpriseTimeZone = TimeZoneInfo.FindSystemTimeZoneById(Enterprise.TimeZoneId);
-
-            return new DateTimeOffset(PurchaceDateTime, TimeSpan.Zero)
-                .ToOffset(enterpriseTimeZone.GetUtcOffset(PurchaceDateTime));
+            return Enterprise.ConvertTimeToTimeZone(PurchaceDateTime);
         }
     }
     public int Mileage { get; set; }
