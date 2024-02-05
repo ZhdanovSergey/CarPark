@@ -1,4 +1,4 @@
-﻿@model CarPark.Models.Vehicle
+﻿@model CarPark.ViewModels.Vehicle.VehicleDetailsViewModel;
 
 <div>
     <h4>Vehicle</h4>
@@ -54,7 +54,7 @@
             Drivers
         </dt>
         <dd class="col-sm-10">
-            @foreach (var driverName in Model.DriversVehicles.Select(m => m.Driver.Name))
+            @foreach (var driverName in Model.Drivers.Select(d => d.Name))
             {
                 <span>@driverName; </span>
             }
@@ -72,7 +72,7 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
-@if (Model.Locations.Count > 0)
+@if (Model.LocationsPagination.Items.Count() > 0)
 {
     <hr />
 
@@ -80,15 +80,15 @@
         <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Locations[0].DateTime)
+                    @Html.DisplayNameFor(model => model.LocationsPagination.Items.FirstOrDefault(l => true).DateTime)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Locations[0].Point)
+                    @Html.DisplayNameFor(model => model.LocationsPagination.Items.FirstOrDefault(l => true).Point)
                 </th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var location in Model.Locations)
+            @foreach (var location in Model.LocationsPagination.Items)
             {
                 <tr>
                     <td>
@@ -103,4 +103,22 @@
     </table>
 
     @Html.Partial("_DateWithLocalShift")
+}
+
+@if (Model.LocationsPagination.HasPreviousPage)
+{
+    <a asp-action="Details"
+       asp-route-page="@(Model.LocationsPagination.PageNumber - 1)">
+        Назад
+    </a>
+}
+
+<span>Страница @Model.LocationsPagination.PageNumber</span>
+
+@if (Model.LocationsPagination.HasNextPage)
+{
+    <a asp-action="Details"
+       asp-route-page="@(Model.LocationsPagination.PageNumber + 1)">
+        Вперед
+    </a>
 }

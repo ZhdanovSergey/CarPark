@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using CarPark.Models;
 using CarPark.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using CarPark.ViewModels.Vehicle;
 
 namespace CarPark.Controllers
 {
@@ -22,7 +22,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists
-        public async Task<IActionResult> Index(int page = 1, int enterpriseId = 0)
+        public async Task<IActionResult> Index(int enterpriseId = 0, int page = 1)
         {
             if (_context.Vehicles == null)
                 return Problem("Entity set 'AppDbContext.Vehicles'  is null.");
@@ -43,7 +43,7 @@ namespace CarPark.Controllers
         }
 
         // GET: Lists/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int page = 1)
         {
             if (id == null || _context.Vehicles == null)
                 return NotFound();
@@ -54,7 +54,6 @@ namespace CarPark.Controllers
                 .Include(v => v.ActiveDriver)
                 .Include(v => v.Brand)
                 .Include(v => v.Enterprise)
-                .Include(v => v.Locations)
                 .Include(v => v.DriversVehicles)
                     .ThenInclude(d => d.Driver)
                 .FirstOrDefaultAsync(v => v.Id == id);
@@ -62,7 +61,15 @@ namespace CarPark.Controllers
             if (vehicle == null)
                 return NotFound();
 
-            return View(vehicle);
+            var locations = _context.Locations
+                .Where(l => l.VehicleId == id);
+
+            var vehicleDetailsVM = new VehicleDetailsViewModel(vehicle)
+            {
+                LocationsPagination = await Pagination<Location>.PaginationAsync(locations, page),
+            };
+
+            return View(vehicleDetailsVM);
         }
 
         // GET: Lists/Create

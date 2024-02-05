@@ -1,4 +1,4 @@
-﻿using CarPark.ViewModels;
+﻿using CarPark.ViewModels.Vehicle;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
