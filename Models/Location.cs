@@ -2,11 +2,11 @@
 
 namespace CarPark.Models;
 
-public class Location
+public sealed class Location
 {
-    public int Id { get; set; }
-    public int VehicleId { get; set; }
-    public Vehicle? Vehicle { get; set; }
-    public DateTime DateTime { get; set; }
-    public Point Point { get; set; }
+    public int Id { get; init; }
+    public required int VehicleId { get; init; }
+    public Vehicle? Vehicle { get; init; }
+    public required DateTime DateTime { get; init; }
+    public required Point Point { get; init; }
 }
