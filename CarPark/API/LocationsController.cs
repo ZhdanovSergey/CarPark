@@ -9,21 +9,19 @@ using CarPark.Models;
 using Microsoft.AspNetCore.Authorization;
 using NetTopologySuite.IO;
 using System.Text.Json;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using CarPark.APIModels;
-using Microsoft.Extensions.Logging;
 
 namespace CarPark.API;
 
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize]
+[Authorize]
 public class LocationsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public LocationsController(ApplicationDbContext context, ILogger<LocationsController> logger)
+    public LocationsController(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -75,8 +73,10 @@ public class LocationsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> PostLocation(IEnumerable<LocationDTO> locationsDTO)
     {
-        if (_context.Locations is null)
-            return Problem("Entity set 'ApplicationDbContext.Locations' is null.");
+        var userVehicles = Vehicle.GetUserVehicles(_context, User);
+
+        if (!locationsDTO.All(l => userVehicles.Any(uv => uv.Id == l.VehicleId)))
+            return Forbid("Cannot wtite locations for vehicles, which does not belong to user");
 
         var locations = locationsDTO.Select(dto => new Models.Location
         {

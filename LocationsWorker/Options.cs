@@ -13,7 +13,13 @@ public class Options
     static double GetRandomDouble(double min, double max) =>
         _random.NextDouble() * (max - min) + min;
 
-    [Option("id", Required = true)]
+    [Option('l', "login")]
+    public string Login { get; init; } = "admin";
+
+    [Option('p', "password")]
+    public string Password { get; init; } = "Admin1!";
+
+    [Option('i', "id", Required = true)]
     public int VehicleId { get; init; }
 
     [Option('d', "distance")]
