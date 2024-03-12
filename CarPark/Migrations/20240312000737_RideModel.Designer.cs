@@ -4,6 +4,7 @@ using CarPark.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace CarPark.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240312000737_RideModel")]
+    partial class RideModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,7 +159,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", (string)null);
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("CarPark.Models.Driver", b =>
@@ -181,7 +184,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Drivers", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("CarPark.Models.DriverVehicle", b =>
@@ -201,7 +204,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("DriversVehicles", (string)null);
+                    b.ToTable("DriversVehicles");
                 });
 
             modelBuilder.Entity("CarPark.Models.Enterprise", b =>
@@ -226,7 +229,7 @@ namespace CarPark.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enterprises", (string)null);
+                    b.ToTable("Enterprises");
                 });
 
             modelBuilder.Entity("CarPark.Models.EnterpriseManager", b =>
@@ -241,7 +244,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("EnterprisesManagers", (string)null);
+                    b.ToTable("EnterprisesManagers");
                 });
 
             modelBuilder.Entity("CarPark.Models.Location", b =>
@@ -266,7 +269,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Locations", (string)null);
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("CarPark.Models.Ride", b =>
@@ -290,7 +293,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Rides", (string)null);
+                    b.ToTable("Rides");
                 });
 
             modelBuilder.Entity("CarPark.Models.Vehicle", b =>
@@ -336,7 +339,7 @@ namespace CarPark.Migrations
 
                     b.HasIndex("EnterpriseId");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

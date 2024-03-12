@@ -17,7 +17,7 @@ namespace CarPark.API;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class LocationsController : ControllerBase
+public sealed class LocationsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
@@ -30,18 +30,18 @@ public class LocationsController : ControllerBase
     [HttpGet("{vehicleId}")]
     public async Task<ActionResult<string>> GetLocations(int vehicleId, DateTime? dateFrom, DateTime? dateTo, bool geoJson = false)
     {
-        var vehicle = _context.Vehicles
+        var vehicle = await _context.Vehicles
             .Include(v => v.Enterprise)
-            .FirstOrDefault(v => v.Id == vehicleId);
+            .FirstOrDefaultAsync(v => v.Id == vehicleId);
 
-        if (vehicle is null || _context.Locations is null)
+        if (vehicle is null)
             return NotFound();
 
         if (!(await Enterprise.CheckAccess(vehicle.EnterpriseId, _context, User)))
             return StatusCode(StatusCodes.Status403Forbidden);
 
         var locationsWithTimezone = _context.Locations
-            .Where(l => vehicleId == null || l.VehicleId == vehicleId)
+            .Where(l => l.VehicleId == vehicleId)
             .Where(l => dateFrom == null || l.DateTime >= dateFrom)
             .Where(l => dateTo == null || l.DateTime <= dateTo)
             .Select(l => new
