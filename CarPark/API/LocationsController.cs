@@ -62,7 +62,7 @@ public sealed class LocationsController : ControllerBase
                 Id = l.Id,
                 VehicleId = l.VehicleId,
                 DateTime = l.DateTime,
-                Point = new LocationDTOPoint { X = l.Point.X, Y = l.Point.Y }
+                Point = new PointDTO { X = l.Point.X, Y = l.Point.Y }
             });
 
         return JsonSerializer.Serialize(locationsWithSimplePoints);

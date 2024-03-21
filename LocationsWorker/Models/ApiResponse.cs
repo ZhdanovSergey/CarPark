@@ -2,40 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CarParkLocationsWorkerService.Models;
 
-class ApiResponse
+sealed class ApiResponse
 {
-    [JsonPropertyName("routes")]
-    public List<Route> Routes { get; init; }
+    public required List<Route> Routes { get; init; }
 }
 
-class Route
+sealed class Route
 {
-    [JsonPropertyName("geometry")]
-    public string Geometry { get; init; }
-
-    [JsonPropertyName("segments")]
-    public List<Segment> Segments { get; init; }
+    public required string Geometry { get; init; }
+    public required List<Segment> Segments { get; init; }
 }
 
-class Segment
+sealed class Segment
 {
-    [JsonPropertyName("steps")]
-    public List<Step> Steps { get; init; }
+    public required List<Step> Steps { get; init; }
 }
 
-class Step
+sealed class Step
 {
-    [JsonPropertyName("distance")]
-    public double Distance { get; init; }
-
-    [JsonPropertyName("duration")]
-    public double Duration { get; init; }
-
-    [JsonPropertyName("way_points")]
-    public List<int> WayPoints { get; init; }
+    public required double Distance { get; init; }
+    public required double Duration { get; init; }
+    public required List<int> WayPoints { get; init; }
 }
