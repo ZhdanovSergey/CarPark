@@ -72,53 +72,70 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
-@if (Model.LocationsPagination.Items.Count() > 0)
+@if (Model.RidesPagination.Items.Count() > 0)
 {
     <hr />
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.LocationsPagination.Items.FirstOrDefault().DateTime)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.LocationsPagination.Items.FirstOrDefault().Point)
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var location in Model.LocationsPagination.Items)
-            {
+    <h4>Rides</h4>
+    <hr />
+    <form asp-controller="Rides" asp-action="Index">
+        <input type="hidden" name="vehicleId" value="@Model.Id">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>
-                        @location.DateTime
-                    </td>
-                    <td>
-                        @location.Point
-                    </td>
+                    <th>
+                        Выбрать
+                    </th>
+                    <th>
+                        RideId
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.RidesPagination.Items.FirstOrDefault().Start)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.RidesPagination.Items.FirstOrDefault().End)
+                    </th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var ride in Model.RidesPagination.Items)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="ids" value="@ride.Id">
+                        </td>
+                        <td>
+                            @ride.Id
+                        </td>
+                        <td>
+                            @ride.Start
+                        </td>
+                        <td>
+                            @ride.End
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button>Показать на карте</button>
+    </form>
 
     @Html.Partial("_DateWithLocalShift")
 }
 
-@if (Model.LocationsPagination.HasPreviousPage)
+@if (Model.RidesPagination.HasPreviousPage)
 {
     <a asp-action="Details"
-       asp-route-page="@(Model.LocationsPagination.PageNumber - 1)">
+       asp-route-page="@(Model.RidesPagination.PageNumber - 1)">
         Назад
     </a>
 }
 
-<span>Страница @Model.LocationsPagination.PageNumber</span>
+<span>Страница @Model.RidesPagination.PageNumber</span>
 
-@if (Model.LocationsPagination.HasNextPage)
+@if (Model.RidesPagination.HasNextPage)
 {
     <a asp-action="Details"
-       asp-route-page="@(Model.LocationsPagination.PageNumber + 1)">
+       asp-route-page="@(Model.RidesPagination.PageNumber + 1)">
         Вперед
     </a>
 }

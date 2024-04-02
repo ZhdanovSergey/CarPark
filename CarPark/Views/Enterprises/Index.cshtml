@@ -25,7 +25,9 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
+                    <a asp-controller="Vehicles" asp-all-route-data='new Dictionary<string, string> { { "enterpriseId", item.Id.ToString() } }'>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </a>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.City)

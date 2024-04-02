@@ -1,0 +1,38 @@
+﻿@using System.Text.Json;
+@using CarPark.APIModels;
+
+@model List<List<PointDTO>>
+
+@{
+    var ridesJson = JsonSerializer.Serialize(Model);
+}
+
+<h4>Rides</h4>
+<hr />
+
+<div id="map" data-rides="@ridesJson" style="width: 1296px; height: 648px"></div>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=a1b7e573-05f9-4b02-9b5c-665c6270d25e&lang=ru_RU"></script>
+
+<script>
+    ymaps.ready(function () {
+        const mapElement = document.getElementById("map");
+        const ridesJson = mapElement.getAttribute("data-rides");
+        const rides = JSON.parse(ridesJson);
+
+        const map = new ymaps.Map("map", {
+            center: [rides[0][0].X, rides[0][0].Y],
+            zoom: 14
+        });
+
+        rides.forEach(ridePoints => {
+            const polylinePoints = ridePoints.map(point => [point.X, point.Y]);
+
+            const polyline = new ymaps.Polyline(polylinePoints, {}, {
+                strokeColor: "#FF0000",
+                strokeWidth: 3,
+            });
+
+            map.geoObjects.add(polyline);
+        });
+    });
+</script>

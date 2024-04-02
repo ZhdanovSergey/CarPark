@@ -33,16 +33,13 @@ public class EnterprisesController : Controller
     // GET: Enterprises/Details/5
     public async Task<IActionResult> Details(int? id)
     {
-        if (id == null || _context.Enterprises == null)
+        if (id is null)
             return NotFound();
 
-        var userEnterprises = Enterprise.GetUserEnterprises(_context, User);
-
-        var enterprise = await userEnterprises
-            .Include(e => e.EnterprisesManagers)
+        var enterprise = await Enterprise.GetUserEnterprises(_context, User)
             .FirstOrDefaultAsync(m => m.Id == id);
 
-        if (enterprise == null)
+        if (enterprise is null)
             return NotFound();
 
         return View(enterprise);

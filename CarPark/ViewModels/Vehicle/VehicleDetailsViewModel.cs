@@ -12,7 +12,7 @@ public class VehicleDetailsViewModel
     public Driver? ActiveDriver { get; set; }
     public Brand Brand { get; set; }
     public Enterprise Enterprise { get; set; }
-    public Pagination<Location> LocationsPagination { get; init; }
+    public Pagination<Ride> RidesPagination { get; init; }
     public string RegistrationNumber { get; set; }
     public DateTimeOffset PurchaceDateTimeOffset { get; set; }
     public int Mileage { get; set; }
