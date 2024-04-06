@@ -48,7 +48,6 @@ public class Worker : BackgroundService
 
         var response = await apiClient.PostAsync(API_URL, content);
         var responseAsString = await response.Content.ReadAsStringAsync();
-
         var responseDeserialized = JsonSerializer.Deserialize<ApiResponse>(responseAsString);
 
         var antiforgeryData = await GetAntiforgeryData(cancellationToken);
